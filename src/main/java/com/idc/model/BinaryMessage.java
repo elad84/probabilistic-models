@@ -10,7 +10,7 @@ import java.util.Arrays;
  */
 public class BinaryMessage {
 	
-	private double[] values;
+	protected double[] values;
 	
 	public BinaryMessage(double zeroValue, double oneValue){
 		values = new double[2];

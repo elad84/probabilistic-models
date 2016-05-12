@@ -1,5 +1,7 @@
 package com.idc.model;
 
+import java.util.Arrays;
+
 /**
  * Psi model
  * 
@@ -29,4 +31,9 @@ public class Psi {
 		return key ? values[1] : values[0];
 	}
 
+
+	@Override
+	public String toString() {
+		return String.format("[%.5f,%.5f]", values[0], values[1]);
+	}
 }

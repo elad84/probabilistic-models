@@ -114,7 +114,8 @@ public class Node {
 	@Override
 	public String toString() {
 		return "Node [root=" + root + ", value=" + value + ", binaryValue="
-				+ binaryValue + "]";
+				+ binaryValue +  ", marginalDisribution="
+				+ marginalDisribution +  "]";
 	}
 
 	public Psi getPsi() {

@@ -27,6 +27,11 @@ public class MarginalDisributionCalculator {
 		this.tree = tree;
 		this.messages = new HashMap<Edge, BinaryMessage>();
 	}
+
+	public void computeMarginals(Node root){
+		BinaryMessage binaryMessage = collect(root, null);
+		distribute(root,null);
+	}
 	
 	/**
 	 * Collects messages from children to parent and calculate Psi 
