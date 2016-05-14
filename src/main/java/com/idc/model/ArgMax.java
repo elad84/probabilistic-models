@@ -1,7 +1,7 @@
 package com.idc.model;
 
 /**
- * Created by annishaa on 5/12/16.
+ * Created by eladcohen on 5/12/16.
  */
 public class ArgMax
 {
