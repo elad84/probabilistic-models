@@ -16,7 +16,7 @@ public class MarginalDisribution extends BinaryMessage{
 	@Override
 	public String toString() {
 		double[] normalizedMarginalDisribution = getNormalizedMarginalDisribution();
-		return String.format("[%.5f,%.5f]", normalizedMarginalDisribution[0], normalizedMarginalDisribution[1]);
+		return String.format("[%.5f,%.5f]-[%.5f,%.5f]", values[0], values[1], normalizedMarginalDisribution[0], normalizedMarginalDisribution[1]);
 	}
 
 	public double[] getNormalizedMarginalDisribution(){

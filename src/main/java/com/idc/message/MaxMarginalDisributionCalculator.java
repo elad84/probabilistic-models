@@ -99,11 +99,16 @@ public class MaxMarginalDisributionCalculator {
 			Node parent = node.getParent();
 //			System.out.println("calculation message between: " + node + " and parent: " + parent);
 			double edgeFlipProbability = tree.getEdgeWeight(new Edge(parent, node));
-			double zeroChildMessage = Math.max((1 - edgeFlipProbability) * psi.getValue(false) , edgeFlipProbability * psi.getValue(true));
-			double oneChildMessage = Math.max(edgeFlipProbability * psi.getValue(false) , (1- edgeFlipProbability) * psi.getValue(true));
+			double zeroFalse = (1 - edgeFlipProbability) * psi.getValue(false);
+			double zeroTrue = edgeFlipProbability * psi.getValue(true);
+			double oneFalse = edgeFlipProbability * psi.getValue(false);
+			double oneTrue = (1 - edgeFlipProbability) * psi.getValue(true);
 
-			boolean  argmaxZeroChildMessage = (zeroChildMessage == ((1 - edgeFlipProbability) * psi.getValue(false))) ? false : true;
-			boolean  argmaxOneChildMessage = (zeroChildMessage == (edgeFlipProbability * psi.getValue(false))) ? false : true;
+			double oneChildMessage = Math.max(oneFalse, oneTrue);
+			double zeroChildMessage = Math.max(zeroFalse, zeroTrue);
+
+			boolean  argmaxZeroChildMessage = (zeroChildMessage == zeroFalse) ? false : true;
+			boolean  argmaxOneChildMessage = (oneChildMessage == oneFalse) ? false : true;
 
 			BinaryMessage message = new BinaryMessage(zeroChildMessage, oneChildMessage);
 			ArgMax argMax = new ArgMax(argmaxZeroChildMessage,argmaxOneChildMessage);
