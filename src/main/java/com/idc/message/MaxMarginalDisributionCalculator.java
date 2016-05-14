@@ -31,7 +31,7 @@ public class MaxMarginalDisributionCalculator {
 	private Map<Edge, ArgMax> maxValues;
 
 	/**
-	 * 
+	 *
 	 */
 	private Map<Node, Boolean> starValues;
 
@@ -39,7 +39,7 @@ public class MaxMarginalDisributionCalculator {
 
 	/**
 	 * Initialize the calculator with the tree to calculate the data for
-	 * 
+	 *
 	 * @param tree
 	 */
 	public MaxMarginalDisributionCalculator(TransmissionTree tree) {
@@ -55,7 +55,7 @@ public class MaxMarginalDisributionCalculator {
 
 	/**
 	 * Computes marginal for all nodes in {@link #tree}
-	 * 
+	 *
 	 * @param root
 	 * @return
 	 */
@@ -68,7 +68,7 @@ public class MaxMarginalDisributionCalculator {
 	/**
 	 * Collects messages from children to parent and calculate Psi for each of
 	 * the nodes
-	 * 
+	 *
 	 * @param node
 	 * @param caller
 	 * @return
@@ -128,9 +128,8 @@ public class MaxMarginalDisributionCalculator {
 			}
 			boolean argMaxStar = (psi.getValue(false) == mMax) ? false : true;
 
-			System.out.println(node.getKey() + " m: " + mMax + " x*: "
-					+ argMaxStar);
-			starValues.put(node, argMaxStar);
+			System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar + " " + message);
+			starValues.put(node,argMaxStar);
 
 			return new ArgMaxBinaryMessage(message, null);
 		} else {
@@ -176,8 +175,7 @@ public class MaxMarginalDisributionCalculator {
 							: argMax.isZeroValue();
 					starValues.put(child, childStarValue);
 
-					System.out.println(child.getKey() + " x*: "
-							+ childStarValue);
+					System.out.println(child.getKey() + " x*: "+ childStarValue + " " + argMax + " " + messages.get(edge));
 					distribute(child);
 				}
 			}
