@@ -20,6 +20,8 @@ public class MaxMarginalDisributionCalculator {
 	private Map<Edge, ArgMax> maxValues;
 	private Map<Node, Boolean> starValues;
 
+	private double mMax;
+
 	public MaxMarginalDisributionCalculator(TransmissionTree tree){
 		this.tree = tree;
 		this.messages = new HashMap<>();
@@ -31,9 +33,10 @@ public class MaxMarginalDisributionCalculator {
 		return starValues;
 	}
 
-	public void computeMarginals(Node root){
+	public double computeMarginals(Node root){
 		collect(root, null);
 		distribute(root);
+		return mMax;
 	}
 	
 	/**
@@ -53,8 +56,7 @@ public class MaxMarginalDisributionCalculator {
 			psi = new Psi(zero, one);
 		}else{
 			//calculate message from children
-			List<BinaryMessage> messages = new ArrayList<BinaryMessage>();
-			List<ArgMax> maxValues = new ArrayList<ArgMax>();
+			List<BinaryMessage> messages = new ArrayList<>();
 			//iterate over all neighbors
 			for(Node child : node.getNeighbors()){
 				//do not call the same node twice to avoid cycle calls
@@ -68,17 +70,12 @@ public class MaxMarginalDisributionCalculator {
 					messages.add(argMaxBinaryMessage.getBinaryMessage());
 
 					this.maxValues.put(edge, argMaxBinaryMessage.getArgMax());
-					maxValues.add(argMaxBinaryMessage.getArgMax());
 				}
 			}
 			double zeroPsi = 1;
 			double onePsi = 1;
 			//calculate Psi for current node
 			for(BinaryMessage message : messages){
-				if(node.isRoot()){
-					System.out.println("adding message " + message + " to calculation");
-				}
-				
 				zeroPsi *= message.getValue(false);
 				onePsi *= message.getValue(true);
 			}
@@ -91,7 +88,11 @@ public class MaxMarginalDisributionCalculator {
 		if(node.isRoot()){
 			BinaryMessage message =  new BinaryMessage(psi.getValue(false), psi.getValue(true));
 
-			double mMax = Math.max(psi.getValue(false),psi.getValue(true));
+			if(node.getValue() > -1 && node.getValue() < 2){
+				mMax = node.getValue() == 1 ? psi.getValue(true) : psi.getValue(false);
+			}else {
+				mMax = Math.max(psi.getValue(false), psi.getValue(true));
+			}
 			boolean  argMaxStar = (psi.getValue(false) == mMax) ? false : true;
 
 			System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar);

@@ -33,9 +33,8 @@ public class MaxMarginalDistributionCalculatorTest {
 		Node node = tree.getNode(1);
 		node.setRoot(true);
 
-		messagePasser.computeMarginals(node);
+		double mMax1 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues1 = messagePasser.getStarValues();
-		System.out.println(tree);
 		System.out.println("--------------------------------------");
 
 		tree = getTransmissionTree(i);
@@ -43,9 +42,8 @@ public class MaxMarginalDistributionCalculatorTest {
 		node = tree.getNode(2);
 		node.setRoot(true);
 
-		messagePasser.computeMarginals(node);
+		double mMax2 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues2 = messagePasser.getStarValues();
-		System.out.println(tree);
 		System.out.println("--------------------------------------");
 
 		tree = getTransmissionTree(i);
@@ -53,9 +51,11 @@ public class MaxMarginalDistributionCalculatorTest {
 		node = tree.getNode(6);
 		node.setRoot(true);
 
-		messagePasser.computeMarginals(node);
+		double mMax3 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues3 = messagePasser.getStarValues();
-		System.out.println(tree);
+
+		Assert.assertEquals("1 vs 2", mMax1,mMax2,.0001);
+		Assert.assertEquals("1 vs 3", mMax1,mMax3,.0001);
 
 		assertMaps(starValues1,starValues2);
 		assertMaps(starValues1,starValues3);
