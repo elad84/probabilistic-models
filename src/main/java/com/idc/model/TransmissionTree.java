@@ -117,6 +117,13 @@ public class TransmissionTree {
 		return treeNodes.get(value);
 	}
 
+	/**
+	 * Gets a map of node key to the marginal distribution of the current snapshot of the tree.
+	 * If a node does not have all marginal distribution calculated yet the value
+	 * will be null for that node
+	 * 
+	 * @return a map contains all nodes marginal distribution. 
+	 */
 	public Map<Integer,MarginalDisribution> getNodesMarginalDisribution(){
 		Map<Integer,MarginalDisribution> marginalDisribution = new HashMap<Integer,MarginalDisribution>();
 		for (Node node : treeNodes.values()) {

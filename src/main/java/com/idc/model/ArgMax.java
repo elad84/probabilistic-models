@@ -1,7 +1,11 @@
 package com.idc.model;
 
 /**
- * Created by eladcohen on 5/12/16.
+ * Model for max argument for each of 
+ * binary data values
+ * 
+ * 
+ * @author eladcohen
  */
 public class ArgMax
 {

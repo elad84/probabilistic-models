@@ -136,7 +136,7 @@ public class MarginalDisributionCalculator {
 		double zero;
 		double one;
 		Psi psi = node.getPsi();
-		// calculate
+		// calculate the final marginal distribution for given node
 		if (message != null) {
 			zero = psi.getValue(false) * message.getValue(false);
 			one = psi.getValue(true) * message.getValue(true);
@@ -154,7 +154,8 @@ public class MarginalDisributionCalculator {
 		node.setMarginalDisribution(new MarginalDisribution(zero, one));
 
 		if (!node.isLeaf()) {
-			// iterate over children
+			// iterate over children, for each one calculate the message from 
+			//parent and distribute the message to child
 			for (Node child : node.getNeighbors()) {
 				if (node.getParent() == null || !node.getParent().equals(child)) {
 					Edge edge = new Edge(child, node);

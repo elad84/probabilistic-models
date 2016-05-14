@@ -1,7 +1,9 @@
 package com.idc.model;
 
 /**
- * Created by eladcohen on 5/12/16.
+ * Model for Max argument of message passing
+ * 
+ * @author eladcohen
  */
 public class ArgMaxBinaryMessage {
 
