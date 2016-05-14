@@ -58,7 +58,7 @@ public class MarginalDisributionCalculator {
 	 * @throws IllegalAccessException 
 	 */
 	public BinaryMessage collect(Node node, Node caller) throws IllegalAccessException{
-		System.out.println("passing message from node: " + node);
+//		System.out.println("passing message from node: " + node);
 		if(logger.isDebugEnabled()){
 			logger.debug("running collect for node: " + node);
 		}

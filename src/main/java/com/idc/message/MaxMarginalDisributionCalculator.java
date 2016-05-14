@@ -15,24 +15,50 @@ import java.util.Map;
  */
 public class MaxMarginalDisributionCalculator {
 
+	/**
+	 * Tree to do all operations on
+	 */
 	private TransmissionTree tree;
+	
+	/**
+	 * Map of messages passed in the tree.
+	 */
 	private Map<Edge, BinaryMessage> messages;
+	
+	/**
+	 * Map of max values per edge
+	 */
 	private Map<Edge, ArgMax> maxValues;
+	
+	/**
+	 * 
+	 */
 	private Map<Node, Boolean> starValues;
 
 	private double mMax;
 
+	/**
+	 * Initialize the calculator with the tree to calculate the data for
+	 * 
+	 * @param tree
+	 */
 	public MaxMarginalDisributionCalculator(TransmissionTree tree){
 		this.tree = tree;
-		this.messages = new HashMap<>();
-		this.maxValues = new HashMap<>();
-		this.starValues = new HashMap<>();
+		this.messages = new HashMap<Edge, BinaryMessage>();
+		this.maxValues = new HashMap<Edge, ArgMax>();
+		this.starValues = new HashMap<Node, Boolean>();
 	}
 
 	public Map<Node, Boolean> getStarValues() {
 		return starValues;
 	}
 
+	/**
+	 * Computes marginal for all nodes in {@link #tree}
+	 * 
+	 * @param root
+	 * @return
+	 */
 	public double computeMarginals(Node root){
 		collect(root, null);
 		distribute(root);
@@ -56,7 +82,7 @@ public class MaxMarginalDisributionCalculator {
 			psi = new Psi(zero, one);
 		}else{
 			//calculate message from children
-			List<BinaryMessage> messages = new ArrayList<>();
+			List<BinaryMessage> messages = new ArrayList<BinaryMessage>();
 			//iterate over all neighbors
 			for(Node child : node.getNeighbors()){
 				//do not call the same node twice to avoid cycle calls

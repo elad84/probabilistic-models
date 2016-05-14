@@ -1,32 +1,107 @@
 package com.idc.message;
 
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.idc.model.MarginalDisribution;
 import com.idc.model.Node;
 import com.idc.model.TransmissionTree;
-
+/**
+ * Test for {@link MaxMarginalDisributionCalculator}
+ * 
+ * @author eladcohen
+ *
+ */
 public class MaxMarginalDistributionCalculatorTest {
 
+	/**
+	 * Tests data settings:
+	 * <ul>
+	 * <li>X3=0</li>
+	 * <li>X4=1</li>
+	 * <li>X6=1</li>
+	 * <li>X7=0</li>
+	 * <li>X9=0</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * The tests runs calculate three times where each time there is
+	 * one node as root:
+	 * <ul>
+	 * <li>X1</li>
+	 * <li>X2</li>
+	 * <li>X6</li>
+	 * </ul>
+	 * 
+	 * Validate the marginal distribution for every node is the same for all iterations
+	 * 
+	 * @throws IllegalAccessException 
+	 */
 	@Test
 	public void testComputeMarginals1(){
 		testComputeMarginals(1);
 	}
 
+	/**
+	 * Tests data settings:
+	 * <ul>
+	 * <li>X3=0</li>
+	 * <li>X4=0</li>
+	 * <li>X6=1</li>
+	 * <li>X7=0</li>
+	 * <li>X9=0</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * The tests runs calculate three times where each time there is
+	 * one node as root:
+	 * <ul>
+	 * <li>X1</li>
+	 * <li>X2</li>
+	 * <li>X6</li>
+	 * </ul>
+	 * 
+	 * Validate the marginal distribution for every node is the same for all iterations
+	 * @throws IllegalAccessException 
+	 */
 	@Test
 	public void testComputeMarginals2(){
 		testComputeMarginals(2);
 	}
 
+	/**
+	 * Tests data settings:
+	 * <ul>
+	 * <li>X3=1</li>
+	 * <li>X4=1</li>
+	 * <li>X6=1</li>
+	 * <li>X7=1</li>
+	 * <li>X9=1</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * The tests runs calculate three times where each time there is
+	 * one node as root:
+	 * <ul>
+	 * <li>X1</li>
+	 * <li>X2</li>
+	 * <li>X6</li>
+	 * </ul>
+	 * 
+	 * Validate the marginal distribution for every node is the same for all iterations
+	 * @throws IllegalAccessException 
+	 */
 	@Test
 	public void testComputeMarginals3(){
 		testComputeMarginals(3);
 	}
 
+	/**
+	 * Tests the computed marginal for all nodes of the tree for a specific settings
+	 * 
+	 * @param i
+	 */
 	public void testComputeMarginals(int i){
 		TransmissionTree tree = getTransmissionTree(i);
 		MaxMarginalDisributionCalculator messagePasser = new MaxMarginalDisributionCalculator(tree);
@@ -61,6 +136,12 @@ public class MaxMarginalDistributionCalculatorTest {
 		assertMaps(starValues1,starValues3);
 	}
 
+	/**
+	 * Asserts that map keys and values are match between two nodes
+	 * 
+	 * @param starValues1
+	 * @param starValues2
+	 */
 	private void assertMaps(Map<Node, Boolean> starValues1, Map<Node, Boolean> starValues2) {
 		for (Map.Entry<Node, Boolean> entry : starValues1.entrySet()) {
 			Node key = entry.getKey();
@@ -73,6 +154,12 @@ public class MaxMarginalDistributionCalculatorTest {
 		}
 	}
 
+	/**
+	 * creates a setting for {@link TransmissionTree}
+	 * 
+	 * @param i
+	 * @return
+	 */
 	private TransmissionTree getTransmissionTree(int i) {
 		if (i==1){
 			return getTransmissionTree1();
@@ -86,6 +173,19 @@ public class MaxMarginalDistributionCalculatorTest {
 		return null;
 	}
 
+	/**
+	 * Gets an instance of {@link TransmissionTree} with settings:
+	 * <ul>
+	 * <li>X3=0</li>
+	 * <li>X4=1</li>
+	 * <li>X6=1</li>
+	 * <li>X7=0</li>
+	 * <li>X9=0</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * @return
+	 */
 	private TransmissionTree getTransmissionTree1() {
 		TransmissionTree tree = TransmissionTreeFactory.buildTree();
 
@@ -104,6 +204,19 @@ public class MaxMarginalDistributionCalculatorTest {
 		return tree;
 	}
 
+	/**
+	 * Gets an instance of {@link TransmissionTree} with settings:
+	 * <ul>
+	 * <li>X3=0</li>
+	 * <li>X4=0</li>
+	 * <li>X6=1</li>
+	 * <li>X7=0</li>
+	 * <li>X9=0</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * @return
+	 */
 	private TransmissionTree getTransmissionTree2() {
 		TransmissionTree tree = TransmissionTreeFactory.buildTree();
 
@@ -122,6 +235,19 @@ public class MaxMarginalDistributionCalculatorTest {
 		return tree;
 	}
 
+	/**
+	 * Gets an instance of {@link TransmissionTree} with settings:
+	 * <ul>
+	 * <li>X3=1</li>
+	 * <li>X4=1</li>
+	 * <li>X6=1</li>
+	 * <li>X7=1</li>
+	 * <li>X9=1</li>
+	 * <li>X10=1</li>
+	 * </ul>
+	 * 
+	 * @return
+	 */
 	private TransmissionTree getTransmissionTree3() {
 		TransmissionTree tree = TransmissionTreeFactory.buildTree();
 
