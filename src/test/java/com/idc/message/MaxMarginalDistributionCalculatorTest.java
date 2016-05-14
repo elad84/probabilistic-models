@@ -1,6 +1,7 @@
 package com.idc.message;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,7 +10,7 @@ import com.idc.model.MarginalDisribution;
 import com.idc.model.Node;
 import com.idc.model.TransmissionTree;
 
-public class MaxMessagePasserTest {
+public class MaxMarginalDistributionCalculatorTest {
 
 	@Test
 	public void testComputeMarginals1(){
@@ -33,7 +34,7 @@ public class MaxMessagePasserTest {
 		node.setRoot(true);
 
 		messagePasser.computeMarginals(node);
-		Map<Integer, MarginalDisribution> nodesMarginalDisribution0 = tree.getNodesMarginalDisribution();
+		Map<Node, Boolean> starValues1 = messagePasser.getStarValues();
 		System.out.println(tree);
 		System.out.println("--------------------------------------");
 
@@ -43,32 +44,32 @@ public class MaxMessagePasserTest {
 		node.setRoot(true);
 
 		messagePasser.computeMarginals(node);
-		Map<Integer, MarginalDisribution> nodesMarginalDisribution1 = tree.getNodesMarginalDisribution();
+		Map<Node, Boolean> starValues2 = messagePasser.getStarValues();
 		System.out.println(tree);
 		System.out.println("--------------------------------------");
 
-		/*tree = getTransmissionTree(i);
+		tree = getTransmissionTree(i);
 		messagePasser = new MaxMarginalDisributionCalculator(tree);
 		node = tree.getNode(6);
 		node.setRoot(true);
 
 		messagePasser.computeMarginals(node);
-		Map<Integer, MarginalDisribution> nodesMarginalDisribution2 = tree.getNodesMarginalDisribution();
+		Map<Node, Boolean> starValues3 = messagePasser.getStarValues();
 		System.out.println(tree);
 
-		assertMaps(nodesMarginalDisribution0,nodesMarginalDisribution1);
-		assertMaps(nodesMarginalDisribution1,nodesMarginalDisribution2);*/
+		assertMaps(starValues1,starValues2);
+		assertMaps(starValues1,starValues3);
 	}
 
-	private void assertMaps(Map<Integer, MarginalDisribution> nodesMarginalDisribution0, Map<Integer, MarginalDisribution> nodesMarginalDisribution1) {
-		for (Map.Entry<Integer, MarginalDisribution> entry : nodesMarginalDisribution0.entrySet()) {
-			Integer key = entry.getKey();
-			MarginalDisribution value0 = entry.getValue();
-			MarginalDisribution value1 = nodesMarginalDisribution1.get(key);
+	private void assertMaps(Map<Node, Boolean> starValues1, Map<Node, Boolean> starValues2) {
+		for (Map.Entry<Node, Boolean> entry : starValues1.entrySet()) {
+			Node key = entry.getKey();
+			Boolean value0 = entry.getValue();
+			Boolean value1 = starValues2.get(key);
 			Assert.assertNotNull(value0);
 			Assert.assertNotNull(value1);
 
-			Assert.assertEquals(value0.toString(),value1.toString());
+			Assert.assertEquals("key: "+ key.getKey(), value0,value1);
 		}
 	}
 

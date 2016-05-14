@@ -18,14 +18,17 @@ public class MaxMarginalDisributionCalculator {
 	private TransmissionTree tree;
 	private Map<Edge, BinaryMessage> messages;
 	private Map<Edge, ArgMax> maxValues;
-
 	private Map<Node, Boolean> starValues;
 
 	public MaxMarginalDisributionCalculator(TransmissionTree tree){
 		this.tree = tree;
-		this.messages = new HashMap<Edge, BinaryMessage>();
-		this.maxValues = new HashMap<Edge, ArgMax>();
-		this.starValues = new HashMap<Node, Boolean>();
+		this.messages = new HashMap<>();
+		this.maxValues = new HashMap<>();
+		this.starValues = new HashMap<>();
+	}
+
+	public Map<Node, Boolean> getStarValues() {
+		return starValues;
 	}
 
 	public void computeMarginals(Node root){
@@ -91,13 +94,13 @@ public class MaxMarginalDisributionCalculator {
 			double mMax = Math.max(psi.getValue(false),psi.getValue(true));
 			boolean  argMaxStar = (psi.getValue(false) == mMax) ? false : true;
 
-			System.out.println(node.getValue() + " m: " + mMax + " x*: "+ argMaxStar);
+			System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar);
 			starValues.put(node,argMaxStar);
 
 			return new ArgMaxBinaryMessage(message,null);
 		}else{
 			Node parent = node.getParent();
-//			System.out.println("calculation message between: " + node + " and parent: " + parent);
+
 			double edgeFlipProbability = tree.getEdgeWeight(new Edge(parent, node));
 			double zeroFalse = (1 - edgeFlipProbability) * psi.getValue(false);
 			double zeroTrue = edgeFlipProbability * psi.getValue(true);
@@ -132,11 +135,10 @@ public class MaxMarginalDisributionCalculator {
 					boolean childStarValue = starValue ? argMax.isOneValue() : argMax.isZeroValue();
 					starValues.put(child, childStarValue);
 
-					System.out.println(child.getValue() + " x*: "+ childStarValue);
+					System.out.println(child.getKey() + " x*: "+ childStarValue);
 					distribute(child);
 				}
 			}
 		}
 	}
-
 }
