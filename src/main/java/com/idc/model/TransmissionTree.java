@@ -34,21 +34,21 @@ public class TransmissionTree {
 		edges.put(edge, weight);
 		
 		//add nodes to the tree
-		Node node = treeNodes.get(first.getValue());
+		Node node = treeNodes.get(first.getKey());
 		if(node == null){
 			//first initialization
 			node = first;
-			treeNodes.put(first.getValue(), first);
+			treeNodes.put(first.getKey(), first);
 		}
 		
 		//add edge to first node
 		
 		node.getNeighbors().add(second);
-		node = treeNodes.get(second.getValue());
+		node = treeNodes.get(second.getKey());
 		if(node == null){
 			//first initialization
 			node = second;
-			treeNodes.put(second.getValue(), second);
+			treeNodes.put(second.getKey(), second);
 		}
 		//add edge to second node
 		node.getNeighbors().add(first);
@@ -94,7 +94,7 @@ public class TransmissionTree {
 		for (int i=0;i<d;++i) {
 			sb.append("\t");
 		}
-		sb.append(root.getValue());
+		sb.append(root.getKey());
 		sb.append("\n");
 
 
@@ -106,6 +106,10 @@ public class TransmissionTree {
 	}
 	
 	public double getEdgeWeight(Edge edge){
+		Double val = edges.get(edge);
+		if(val == null){
+			System.out.println(edge);
+		}
 		return edges.get(edge);
 	}
 	
@@ -114,9 +118,9 @@ public class TransmissionTree {
 	}
 
 	public Map<Integer,MarginalDisribution> getNodesMarginalDisribution(){
-		Map<Integer,MarginalDisribution> marginalDisribution = new HashMap<>();
+		Map<Integer,MarginalDisribution> marginalDisribution = new HashMap<Integer,MarginalDisribution>();
 		for (Node node : treeNodes.values()) {
-			marginalDisribution.put(node.getValue(),node.getMarginalDisribution());
+			marginalDisribution.put(node.getKey(),node.getMarginalDisribution());
 		}
 		return marginalDisribution;
 	}

@@ -21,7 +21,7 @@ public class Node {
 	/**
 	 * Serial number for this node
 	 */
-	private int value;
+	private int key;
 	
 	private Node parent;
 	
@@ -33,7 +33,7 @@ public class Node {
 	/**
 	 * binary value indicator
 	 */
-	private boolean binaryValue;
+	private int value;
 	
 	private Psi psi;
 	
@@ -45,8 +45,9 @@ public class Node {
 	 * @param value
 	 */
 	public Node(int value){
-		this.value = value;
+		this.key = value;
 		this.neighbors = new HashSet<Node>();
+		this.value = -1;
 	}
 	
 	public Set<Node> getNeighbors(){
@@ -61,7 +62,7 @@ public class Node {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + value;
+		result = prime * result + key;
 		return result;
 	}
 
@@ -74,17 +75,13 @@ public class Node {
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (value != other.value)
+		if (key != other.key)
 			return false;
 		return true;
 	}
 
-	public int getValue() {
-		return value;
-	}
-
-	public void setValue(int value) {
-		this.value = value;
+	public int getKey() {
+		return key;
 	}
 
 	public Node getParent() {
@@ -103,18 +100,11 @@ public class Node {
 		this.root = root;
 	}
 
-	public boolean isTrue() {
-		return binaryValue;
-	}
-
-	public void setBinaryValue(boolean binaryValue) {
-		this.binaryValue = binaryValue;
-	}
 
 	@Override
 	public String toString() {
-		return "Node [root=" + root + ", value=" + value + ", binaryValue="
-				+ binaryValue +  ", marginalDisribution="
+		return "Node [root=" + root + ", key=" + key + ", value="
+				+ value +  ", marginalDisribution="
 				+ marginalDisribution +  "]";
 	}
 
@@ -132,6 +122,14 @@ public class Node {
 
 	public void setMarginalDisribution(MarginalDisribution marginalDisribution) {
 		this.marginalDisribution = marginalDisribution;
+	}
+
+	public int getValue(){
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
 	}
 
 }

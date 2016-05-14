@@ -1,6 +1,5 @@
 package com.idc.model;
 
-import java.util.Arrays;
 
 /**
  * Psi model

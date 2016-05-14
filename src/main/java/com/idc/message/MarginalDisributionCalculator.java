@@ -1,9 +1,12 @@
 package com.idc.message;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import com.idc.model.BinaryMessage;
 import com.idc.model.Edge;
@@ -20,16 +23,28 @@ import com.idc.model.TransmissionTree;
  */
 public class MarginalDisributionCalculator {
 	
+	private static Logger logger = Logger.getLogger(MarginalDisributionCalculator.class);
+	
 	private TransmissionTree tree;
 	private Map<Edge, BinaryMessage> messages;
 	
+	/**
+	 * Constructor getting tree to calculate distribution for
+	 * @param tree
+	 */
 	public MarginalDisributionCalculator(TransmissionTree tree){
 		this.tree = tree;
 		this.messages = new HashMap<Edge, BinaryMessage>();
 	}
 
-	public void computeMarginals(Node root){
-		BinaryMessage binaryMessage = collect(root, null);
+	/**
+	 * Computes the marginal distribution per node
+	 * 
+	 * @param root
+	 * @throws IllegalAccessException 
+	 */
+	public void computeMarginals(Node root) throws IllegalAccessException{
+		collect(root, null);
 		distribute(root,null);
 	}
 	
@@ -40,13 +55,17 @@ public class MarginalDisributionCalculator {
 	 * @param node
 	 * @param caller
 	 * @return
+	 * @throws IllegalAccessException 
 	 */
-	public BinaryMessage collect(Node node, Node caller){
-//		System.out.println("passing message from node: " + node);
+	public BinaryMessage collect(Node node, Node caller) throws IllegalAccessException{
+		System.out.println("passing message from node: " + node);
+		if(logger.isDebugEnabled()){
+			logger.debug("running collect for node: " + node);
+		}
 		Psi psi;
 		if(node.isLeaf()){
-			double zero = node.isTrue() ? 0 : 1;
-			double one = node.isTrue() ? 1 : 0;
+			double zero = 1 - node.getValue();
+			double one = node.getValue();
 			psi = new Psi(zero, one);
 		}else{
 			//calculate message from children
@@ -63,18 +82,14 @@ public class MarginalDisributionCalculator {
 				}
 				
 			}
-			double zeroPsi = 1;
-			double onePsi = 1;
+			BigDecimal zeroPsi = BigDecimal.valueOf(1.0);
+			BigDecimal onePsi = BigDecimal.valueOf(1.0);
 			//calculate Psi for current node
 			for(BinaryMessage message : messages){
-				if(node.isRoot()){
-					System.out.println("adding message " + message + " to calculation");
-				}
-				
-				zeroPsi *= message.getValue(false);
-				onePsi *= message.getValue(true);
+				zeroPsi = zeroPsi.multiply(BigDecimal.valueOf(message.getValue(false)));
+				onePsi = onePsi.multiply(BigDecimal.valueOf(message.getValue(true)));
 			}
-			psi = new Psi(zeroPsi, onePsi);
+			psi = new Psi(zeroPsi.doubleValue(), onePsi.doubleValue());
 		}
 		
 		node.setPsi(psi);
@@ -84,10 +99,10 @@ public class MarginalDisributionCalculator {
 			return new BinaryMessage(psi.getValue(false), psi.getValue(true));
 		}else{
 			Node parent = node.getParent();
-//			System.out.println("calculation message between: " + node + " and parent: " + parent);
 			double edgeFlipProbability = tree.getEdgeWeight(new Edge(parent, node));
 			double zeroChildMessage = (1 - edgeFlipProbability) * psi.getValue(false) + edgeFlipProbability * psi.getValue(true);
 			double oneChildMessage = edgeFlipProbability * psi.getValue(false) + (1- edgeFlipProbability) * psi.getValue(true);
+			logger.debug("message " + node.getKey() + "->" + parent.getKey() + ", values: " + zeroChildMessage + ", " + oneChildMessage);
 			return new BinaryMessage(zeroChildMessage, oneChildMessage);
 		}	
 	}
@@ -107,8 +122,13 @@ public class MarginalDisributionCalculator {
 			zero = psi.getValue(false) * message.getValue(false);
 			one = psi.getValue(true) * message.getValue(true);
 		}else{
-			zero = psi.getValue(false);
-			one = psi.getValue(true);
+			if(node.getValue() > -1 && node.getValue() < 2){
+				zero = (1 - node.getValue()) * psi.getValue(false);
+				one = node.getValue() * psi.getValue(true);
+			}else{
+				zero = psi.getValue(false);
+				one = psi.getValue(true);
+			}
 		}
 		
 		node.setMarginalDisribution(new MarginalDisribution(zero, one));

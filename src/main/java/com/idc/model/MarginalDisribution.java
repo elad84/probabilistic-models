@@ -1,6 +1,5 @@
 package com.idc.model;
 
-import java.util.Arrays;
 
 /**
  * Marginal distribution model 
@@ -16,7 +15,7 @@ public class MarginalDisribution extends BinaryMessage{
 
 	@Override
 	public String toString() {
-		return String.format("[%.5f,%.5f]", values[0], values[1]);
+		return String.format("[%.4f,%.4f]", values[0], values[1]);
 	}
 
 }
