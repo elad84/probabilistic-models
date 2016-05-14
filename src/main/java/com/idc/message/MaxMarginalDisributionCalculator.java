@@ -19,17 +19,17 @@ public class MaxMarginalDisributionCalculator {
 	 * Tree to do all operations on
 	 */
 	private TransmissionTree tree;
-	
+
 	/**
 	 * Map of messages passed in the tree.
 	 */
 	private Map<Edge, BinaryMessage> messages;
-	
+
 	/**
 	 * Map of max values per edge
 	 */
 	private Map<Edge, ArgMax> maxValues;
-	
+
 	/**
 	 * 
 	 */
@@ -42,7 +42,7 @@ public class MaxMarginalDisributionCalculator {
 	 * 
 	 * @param tree
 	 */
-	public MaxMarginalDisributionCalculator(TransmissionTree tree){
+	public MaxMarginalDisributionCalculator(TransmissionTree tree) {
 		this.tree = tree;
 		this.messages = new HashMap<Edge, BinaryMessage>();
 		this.maxValues = new HashMap<Edge, ArgMax>();
@@ -59,40 +59,42 @@ public class MaxMarginalDisributionCalculator {
 	 * @param root
 	 * @return
 	 */
-	public double computeMarginals(Node root){
+	public double computeMarginals(Node root) {
 		collect(root, null);
 		distribute(root);
 		return mMax;
 	}
-	
+
 	/**
-	 * Collects messages from children to parent and calculate Psi 
-	 * for each of the nodes
-	 *  
+	 * Collects messages from children to parent and calculate Psi for each of
+	 * the nodes
+	 * 
 	 * @param node
 	 * @param caller
 	 * @return
 	 */
-	public ArgMaxBinaryMessage collect(Node node, Node caller){
-//		System.out.println("passing message from node: " + node);
+	public ArgMaxBinaryMessage collect(Node node, Node caller) {
+		// System.out.println("passing message from node: " + node);
 		Psi psi;
-		if(node.isLeaf()){
+		if (node.isLeaf()) {
 			double zero = 1 - node.getValue();
 			double one = node.getValue();
 			psi = new Psi(zero, one);
-		}else{
-			//calculate message from children
+		} else {
+			// calculate message from children
 			List<BinaryMessage> messages = new ArrayList<BinaryMessage>();
-			//iterate over all neighbors
-			for(Node child : node.getNeighbors()){
-				//do not call the same node twice to avoid cycle calls
-				if(!child.equals(caller)){
+			// iterate over all neighbors
+			for (Node child : node.getNeighbors()) {
+				// do not call the same node twice to avoid cycle calls
+				if (!child.equals(caller)) {
 					child.setParent(node);
-					ArgMaxBinaryMessage argMaxBinaryMessage = collect(child, node);
+					ArgMaxBinaryMessage argMaxBinaryMessage = collect(child,
+							node);
 
-					//add for distribute map
+					// add for distribute map
 					Edge edge = new Edge(child, node);
-					this.messages.put(edge, argMaxBinaryMessage.getBinaryMessage());
+					this.messages.put(edge,
+							argMaxBinaryMessage.getBinaryMessage());
 					messages.add(argMaxBinaryMessage.getBinaryMessage());
 
 					this.maxValues.put(edge, argMaxBinaryMessage.getArgMax());
@@ -100,35 +102,42 @@ public class MaxMarginalDisributionCalculator {
 			}
 			double zeroPsi = 1;
 			double onePsi = 1;
-			//calculate Psi for current node
-			for(BinaryMessage message : messages){
+			// calculate Psi for current node
+			for (BinaryMessage message : messages) {
 				zeroPsi *= message.getValue(false);
 				onePsi *= message.getValue(true);
 			}
-			psi = new Psi(zeroPsi, onePsi);
+			if (node.isRoot())
+				psi = new Psi(zeroPsi * 0.5, onePsi * 0.5);
+			else
+				psi = new Psi(zeroPsi, onePsi);
 		}
-		
-		node.setPsi(psi);
-		
-		//calculate message from child to parent, when root just return
-		if(node.isRoot()){
-			BinaryMessage message =  new BinaryMessage(psi.getValue(false), psi.getValue(true));
 
-			if(node.getValue() > -1 && node.getValue() < 2){
-				mMax = node.getValue() == 1 ? psi.getValue(true) : psi.getValue(false);
-			}else {
+		node.setPsi(psi);
+
+		// calculate message from child to parent, when root just return
+		if (node.isRoot()) {
+			BinaryMessage message = new BinaryMessage(psi.getValue(false),
+					psi.getValue(true));
+
+			if (node.getValue() > -1 && node.getValue() < 2) {
+				mMax = node.getValue() == 1 ? psi.getValue(true) : psi
+						.getValue(false);
+			} else {
 				mMax = Math.max(psi.getValue(false), psi.getValue(true));
 			}
-			boolean  argMaxStar = (psi.getValue(false) == mMax) ? false : true;
+			boolean argMaxStar = (psi.getValue(false) == mMax) ? false : true;
 
-			System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar);
-			starValues.put(node,argMaxStar);
+			System.out.println(node.getKey() + " m: " + mMax + " x*: "
+					+ argMaxStar);
+			starValues.put(node, argMaxStar);
 
-			return new ArgMaxBinaryMessage(message,null);
-		}else{
+			return new ArgMaxBinaryMessage(message, null);
+		} else {
 			Node parent = node.getParent();
 
-			double edgeFlipProbability = tree.getEdgeWeight(new Edge(parent, node));
+			double edgeFlipProbability = tree.getEdgeWeight(new Edge(parent,
+					node));
 			double zeroFalse = (1 - edgeFlipProbability) * psi.getValue(false);
 			double zeroTrue = edgeFlipProbability * psi.getValue(true);
 			double oneFalse = edgeFlipProbability * psi.getValue(false);
@@ -137,32 +146,38 @@ public class MaxMarginalDisributionCalculator {
 			double oneChildMessage = Math.max(oneFalse, oneTrue);
 			double zeroChildMessage = Math.max(zeroFalse, zeroTrue);
 
-			boolean  argmaxZeroChildMessage = (zeroChildMessage == zeroFalse) ? false : true;
-			boolean  argmaxOneChildMessage = (oneChildMessage == oneFalse) ? false : true;
+			boolean argmaxZeroChildMessage = (zeroChildMessage == zeroFalse) ? false
+					: true;
+			boolean argmaxOneChildMessage = (oneChildMessage == oneFalse) ? false
+					: true;
 
-			BinaryMessage message = new BinaryMessage(zeroChildMessage, oneChildMessage);
-			ArgMax argMax = new ArgMax(argmaxZeroChildMessage,argmaxOneChildMessage);
-			return new ArgMaxBinaryMessage(message,argMax);
-		}	
+			BinaryMessage message = new BinaryMessage(zeroChildMessage,
+					oneChildMessage);
+			ArgMax argMax = new ArgMax(argmaxZeroChildMessage,
+					argmaxOneChildMessage);
+			return new ArgMaxBinaryMessage(message, argMax);
+		}
 	}
-	
+
 	/**
 	 * Distributes messages from parent to child nodes
 	 *
 	 */
-	public void distribute(Node node){
-		if(!node.isLeaf()){
+	public void distribute(Node node) {
+		if (!node.isLeaf()) {
 
 			Boolean starValue = starValues.get(node);
-			//iterate over children
-			for(Node child : node.getNeighbors()){
-				if(node.getParent() == null || !node.getParent().equals(child)){
+			// iterate over children
+			for (Node child : node.getNeighbors()) {
+				if (node.getParent() == null || !node.getParent().equals(child)) {
 					Edge edge = new Edge(child, node);
 					ArgMax argMax = maxValues.get(edge);
-					boolean childStarValue = starValue ? argMax.isOneValue() : argMax.isZeroValue();
+					boolean childStarValue = starValue ? argMax.isOneValue()
+							: argMax.isZeroValue();
 					starValues.put(child, childStarValue);
 
-					System.out.println(child.getKey() + " x*: "+ childStarValue);
+					System.out.println(child.getKey() + " x*: "
+							+ childStarValue);
 					distribute(child);
 				}
 			}
