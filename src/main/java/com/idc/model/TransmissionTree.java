@@ -27,7 +27,7 @@ public class TransmissionTree {
 	 * @param first
 	 * @param second
 	 */
-	public void addEdge(double weight, Node first, Node second){
+	public void addEdge(Double weight, Node first, Node second){
 		//add edge in both directions
 		Edge edge = new Edge(first, second);
 		edges.put(new Edge(second, first),weight);
