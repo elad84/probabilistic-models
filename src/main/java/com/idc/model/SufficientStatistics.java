@@ -10,9 +10,9 @@ import java.util.stream.Stream;
  */
 public class SufficientStatistics {
 
-    private  Map<KeyPair,Long[]> nodeKey2Count = new HashMap<>();
+    private  Map<KeyPair,Long[][]> nodeKey2Count = new HashMap<>();
 
-    private  Map<KeyPair,Double[]> nodeKey2CountMLE = new HashMap<>();
+    private  Map<KeyPair,Double[][]> nodeKey2CountMLE = new HashMap<>();
 
     private Double loglikelihood;
 
@@ -20,35 +20,48 @@ public class SufficientStatistics {
         KeyPair keyPair = new KeyPair();
         keyPair.key = key;
 
-        nodeKey2Count.put(keyPair, new Long[]{nObservationsZero,nObservationsOne});
+        nodeKey2Count.put(keyPair, new Long[][]{{nObservationsZero,nObservationsOne}});
     }
 
     public void setNodeKey2Count(int key, int parentKey, long nObservationsZeroParentZero, long nObservationsOneParentZero, long nObservationsZeroParentOne, long nObservationsOneParentOne) {
         KeyPair keyPair0 = new KeyPair();
         keyPair0.key = key;
         keyPair0.parentKey = parentKey;
-        keyPair0.parentValue = 0;
-        nodeKey2Count.put(keyPair0, new Long[]{ nObservationsZeroParentZero, nObservationsOneParentZero});
-
-
-        KeyPair keyPair1 = new KeyPair();
-        keyPair1.key = key;
-        keyPair1.parentKey = parentKey;
-        keyPair1.parentValue = 1;
-        nodeKey2Count.put(keyPair1, new Long[]{ nObservationsZeroParentOne, nObservationsOneParentOne});
+        nodeKey2Count.put(keyPair0, new Long[][]{{ nObservationsZeroParentZero, nObservationsOneParentZero}, { nObservationsZeroParentOne, nObservationsOneParentOne}});
     }
 
     public void computeMLE(){
         nodeKey2CountMLE = nodeKey2Count.entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey(),
-                        e -> new Double[]{(e.getValue()[0] / (double) (e.getValue()[0] + e.getValue()[1])), (e.getValue()[1] / (double) (e.getValue()[0] + e.getValue()[1]))}
-                ));
+                        e -> {
+                            Long[][] nCounts = e.getValue();
+                            long rowParentZero = nCounts[0][0] + nCounts[0][1];
+                            if (e.getKey().parentKey == null){
+                                return new Double[][]{{(nCounts[0][0] / (double) rowParentZero), (nCounts[0][1] / (double) (rowParentZero))}};
+                            }
+
+                            long rowParentOne = nCounts[1][0] + nCounts[1][1];
+                            return new Double[][]{{(nCounts[0][0] / (double) rowParentZero), (nCounts[0][1] / (double) (rowParentZero))},
+                                    {(nCounts[1][0] / (double) rowParentOne), (nCounts[1][1] / (double) (rowParentOne))}};
+                        }));
     }
 
     public void computeLoglikelihood(){
-        Stream<Map.Entry<KeyPair, Double[]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream().filter(e -> e.getKey().parentValue == null || e.getKey().parentValue == 0);
-        Double loglikelihood = entryZeroStream.mapToDouble(e -> Math.log(e.getValue()[1]) * nodeKey2Count.get(e.getKey())[1]).sum();
+        Stream<Map.Entry<KeyPair, Double[][]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream();
+        Double loglikelihood = entryZeroStream.mapToDouble(e -> {
+            Double[][] nProb = e.getValue();
+            Long[][] nCounts = nodeKey2Count.get(e.getKey());
+            double p00 = Math.log(nProb[0][0]) * nCounts[0][0];
+            double p01 = Math.log(nProb[0][1]) * nCounts[0][1];
+            if (e.getKey().parentKey == null){
+                return p00 +p01;
+            }
+
+            double p10 = Math.log(nProb[1][0]) * nCounts[1][0];
+            double p11 = Math.log(nProb[1][1]) * nCounts[1][1];
+            return p00 + p10  + p01 + p11;
+        }).sum();
 
         this.loglikelihood = loglikelihood;
     }
@@ -57,9 +70,14 @@ public class SufficientStatistics {
     public String toString() {
         StringBuilder sbTitle = new StringBuilder();
         StringBuilder sb = new StringBuilder();
-        Stream<Map.Entry<KeyPair, Double[]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream().filter(e -> e.getKey().parentValue != null && e.getKey().parentValue == 0);
+        Stream<Map.Entry<KeyPair, Double[][]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream();
         entryZeroStream.forEach( e -> {
-            sb.append(String.format("%.3f\t ",e.getValue()[1]));
+            if (e.getKey().parentKey == null){
+                return;
+            }
+
+            Double flipProb = 0.5 * ( e.getValue()[0][1] + e.getValue()[1][0]);
+            sb.append(String.format("%.3f\t ", flipProb));
             sbTitle.append(String.format("p%d-%d\t ",e.getKey().key, e.getKey().parentKey));
         });
 
@@ -73,11 +91,10 @@ public class SufficientStatistics {
     public static class KeyPair{
         public Integer key;
         public Integer parentKey;
-        public Integer parentValue;
 
         @Override
         public String toString() {
-            return String.format("%d | %d = %d", key, parentKey, parentValue);
+            return String.format("%d | %d", key, parentKey);
         }
     }
 }

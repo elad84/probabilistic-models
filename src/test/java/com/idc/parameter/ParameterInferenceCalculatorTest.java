@@ -24,7 +24,5 @@ public class ParameterInferenceCalculatorTest {
         parameterInferenceCalculator.computeMLE(node);
 
         System.out.println(parameterInferenceCalculator);
-
-
     }
 }
