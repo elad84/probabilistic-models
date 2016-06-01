@@ -23,6 +23,7 @@ public class ParameterInferenceCalculator {
         computeSufficientStatistics(root,null);
         sufficientStatistics.computeMLE();
         sufficientStatistics.computeLoglikelihood();
+        sufficientStatistics.computeFlipProbabilities();
 
     }
 

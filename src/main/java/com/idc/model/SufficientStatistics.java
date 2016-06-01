@@ -14,6 +14,8 @@ public class SufficientStatistics {
 
     private  Map<KeyPair,Double[][]> nodeKey2CountMLE = new HashMap<>();
 
+    private  Map<KeyPair,Double> nodeKey2FlipProbability = new HashMap<>();
+
     private Double loglikelihood;
 
     public void setNodeKey2Count(int key, long nObservationsZero, long nObservationsOne) {
@@ -66,21 +68,23 @@ public class SufficientStatistics {
         this.loglikelihood = loglikelihood;
     }
 
+
+    public void computeFlipProbabilities(){
+        Stream<Map.Entry<KeyPair, Double[][]>> entryStream = nodeKey2CountMLE.entrySet().stream().filter(e -> e.getKey().parentKey!=null);
+        this.nodeKey2FlipProbability = entryStream.collect(Collectors.toMap(
+                e -> e.getKey(),
+                e ->  0.5 * ( e.getValue()[0][1] + e.getValue()[1][0])
+        ));
+    }
+
     @Override
     public String toString() {
         StringBuilder sbTitle = new StringBuilder();
         StringBuilder sb = new StringBuilder();
-        Stream<Map.Entry<KeyPair, Double[][]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream();
-        entryZeroStream.forEach( e -> {
-            if (e.getKey().parentKey == null){
-                return;
-            }
-
-            Double flipProb = 0.5 * ( e.getValue()[0][1] + e.getValue()[1][0]);
-            sb.append(String.format("%.3f\t ", flipProb));
+        nodeKey2FlipProbability.entrySet().stream().forEach(e ->{
+            sb.append(String.format("%.3f\t ", e.getValue()));
             sbTitle.append(String.format("p%d-%d\t ",e.getKey().key, e.getKey().parentKey));
         });
-
 
         sbTitle.append("log-ld\n");
         sb.append(loglikelihood);
