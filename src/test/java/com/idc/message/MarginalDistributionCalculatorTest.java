@@ -102,7 +102,7 @@ public class MarginalDistributionCalculatorTest {
 		TransmissionTree tree = getTransmissionTree(i);
 		MarginalDisributionCalculator messagePasser = new MarginalDisributionCalculator(tree);
 		Node node = tree.getNode(1);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		messagePasser.computeMarginals(node);
 		Map<Integer, MarginalDisribution> nodesMarginalDisribution1 = tree.getNodesMarginalDisribution();
@@ -112,7 +112,7 @@ public class MarginalDistributionCalculatorTest {
 		tree = getTransmissionTree(i);
 		messagePasser = new MarginalDisributionCalculator(tree);
 		node = tree.getNode(2);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		messagePasser.computeMarginals(node);
 		Map<Integer, MarginalDisribution> nodesMarginalDisribution2 = tree.getNodesMarginalDisribution();
@@ -122,7 +122,7 @@ public class MarginalDistributionCalculatorTest {
 		tree = getTransmissionTree(i);
 		messagePasser = new MarginalDisributionCalculator(tree);
 		node = tree.getNode(6);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		messagePasser.computeMarginals(node);
 		Map<Integer, MarginalDisribution> nodesMarginalDisribution6 = tree.getNodesMarginalDisribution();
@@ -160,7 +160,7 @@ public class MarginalDistributionCalculatorTest {
 	}
 
 	private TransmissionTree getTransmissionTree1() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(0);
@@ -178,7 +178,7 @@ public class MarginalDistributionCalculatorTest {
 	}
 
 	private TransmissionTree getTransmissionTree2() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(0);
@@ -196,7 +196,7 @@ public class MarginalDistributionCalculatorTest {
 	}
 
 	private TransmissionTree getTransmissionTree3() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(1);

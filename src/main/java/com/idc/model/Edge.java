@@ -1,4 +1,5 @@
 package com.idc.model;
+
 /**
  * Tree edge between two nodes
  * 
@@ -6,11 +7,11 @@ package com.idc.model;
  *
  */
 public class Edge {
-	
+
 	private Node firstNode;
 	private Node secondNode;
-	
-	public Edge(Node first, Node another){
+
+	public Edge(Node first, Node another) {
 		this.firstNode = first;
 		this.secondNode = another;
 	}
@@ -18,12 +19,9 @@ public class Edge {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((firstNode == null) ? 0 : firstNode.hashCode());
-		result = prime * result
+		int a = ((firstNode == null) ? 0 : firstNode.hashCode())
 				+ ((secondNode == null) ? 0 : secondNode.hashCode());
-		return result;
+		return prime * a;
 	}
 
 	@Override
@@ -35,23 +33,28 @@ public class Edge {
 		if (getClass() != obj.getClass())
 			return false;
 		Edge other = (Edge) obj;
-		if (firstNode == null) {
-			if (other.firstNode != null)
-				return false;
-		} else if (!firstNode.equals(other.firstNode) && !firstNode.equals(other.secondNode))
-			return false;
-		if (secondNode == null) {
-			if (other.secondNode != null)
-				return false;
-		} else if (!secondNode.equals(other.secondNode) && !secondNode.equals(other.firstNode))
-			return false;
-		return true;
+
+		if (firstNode.equals(other.firstNode)
+				&& secondNode.equals(other.secondNode))
+			return true;
+		else if (secondNode.equals(other.firstNode)
+				&& firstNode.equals(other.secondNode))
+			return true;
+		return false;
 	}
 
 	@Override
 	public String toString() {
 		return "Edge [firstNode=" + firstNode + ", secondNode=" + secondNode
 				+ "]";
+	}
+
+	public Node getFirstNode() {
+		return firstNode;
+	}
+
+	public Node getSecondNode() {
+		return secondNode;
 	}
 
 }

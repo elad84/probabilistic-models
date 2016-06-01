@@ -82,7 +82,6 @@ public class MarginalDisributionCalculator {
 			for (Node child : node.getNeighbors()) {
 				// do not call the same node twice to avoid cycle calls
 				if (!child.equals(caller)) {
-					child.setParent(node);
 					BinaryMessage message = collect(child, node);
 					// add for distribute map
 					this.messages.put(new Edge(child, node), message);

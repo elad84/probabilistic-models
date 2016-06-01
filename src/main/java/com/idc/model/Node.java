@@ -12,21 +12,16 @@ import java.util.Set;
  *
  */
 public class Node {
-	
-	/**
-	 * Indication whether this node is root
-	 */
-	private boolean root;
-	
+
 	/**
 	 * Serial number for this node
 	 */
 	private int key;
-	
+
 	private Node parent;
-	
+
 	/**
-	 * Neighbors of the current node 
+	 * Neighbors of the current node
 	 */
 	private Set<Node> neighbors;
 
@@ -34,27 +29,30 @@ public class Node {
 	 * binary value indicator
 	 */
 	private int value;
-	
+
 	private Psi psi;
-	
+
 	private MarginalDisribution marginalDisribution;
-	
+
+	TransmissionTree tree;
+
 	/**
-	 * Constructor with only the serial value of the node 
+	 * Constructor with only the serial value of the node
 	 * 
 	 * @param value
 	 */
-	public Node(int value){
+	public Node(TransmissionTree tree, int value) {
 		this.key = value;
 		this.neighbors = new HashSet<Node>();
 		this.value = -1;
+		this.tree = tree;
 	}
-	
-	public Set<Node> getNeighbors(){
+
+	public Set<Node> getNeighbors() {
 		return neighbors;
 	}
-	
-	public boolean isLeaf(){
+
+	public boolean isLeaf() {
 		return neighbors.size() == 1 && !isRoot();
 	}
 
@@ -88,24 +86,23 @@ public class Node {
 		return parent;
 	}
 
-	public void setParent(Node parent) {
+	void setParent(Node parent) {
 		this.parent = parent;
+		for (Node neighbor : this.getNeighbors()) {
+			if (neighbor != this.parent) {
+				neighbor.setParent(this);
+			}
+		}
 	}
 
 	public boolean isRoot() {
-		return root;
+		return parent == null;
 	}
-
-	public void setRoot(boolean root) {
-		this.root = root;
-	}
-
 
 	@Override
 	public String toString() {
-		return "Node [root=" + root + ", key=" + key + ", value="
-				+ value +  ", marginalDisribution="
-				+ marginalDisribution +  "]";
+		return "Node [root=" + isRoot() + ", key=" + key + ", value=" + value
+				+ ", marginalDisribution=" + marginalDisribution + "]";
 	}
 
 	public Psi getPsi() {
@@ -124,12 +121,25 @@ public class Node {
 		this.marginalDisribution = marginalDisribution;
 	}
 
-	public int getValue(){
+	public int getValue() {
 		return value;
 	}
 
 	public void setValue(int value) {
 		this.value = value;
+	}
+
+	public double likelihood() {
+		double likelihood = 1;
+		for (Node neighbor : this.getNeighbors()) {
+			if (neighbor != this.parent) {
+				double p = tree.getEdgeWeight(new Edge(this, neighbor));
+				likelihood *= (value == neighbor.getValue() ? (1 - p) : p);
+				likelihood *= neighbor.likelihood();
+
+			}
+		}
+		return likelihood;
 	}
 
 }

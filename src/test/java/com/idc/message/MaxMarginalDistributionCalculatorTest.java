@@ -106,7 +106,7 @@ public class MaxMarginalDistributionCalculatorTest {
 		TransmissionTree tree = getTransmissionTree(i);
 		MaxMarginalDisributionCalculator messagePasser = new MaxMarginalDisributionCalculator(tree);
 		Node node = tree.getNode(1);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		double mMax1 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues1 = messagePasser.getStarValues();
@@ -115,7 +115,7 @@ public class MaxMarginalDistributionCalculatorTest {
 		tree = getTransmissionTree(i);
 		messagePasser = new MaxMarginalDisributionCalculator(tree);
 		node = tree.getNode(2);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		double mMax2 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues2 = messagePasser.getStarValues();
@@ -124,7 +124,7 @@ public class MaxMarginalDistributionCalculatorTest {
 		tree = getTransmissionTree(i);
 		messagePasser = new MaxMarginalDisributionCalculator(tree);
 		node = tree.getNode(6);
-		node.setRoot(true);
+		tree.setRoot(node);
 
 		double mMax3 = messagePasser.computeMarginals(node);
 		Map<Node, Boolean> starValues3 = messagePasser.getStarValues();
@@ -187,7 +187,7 @@ public class MaxMarginalDistributionCalculatorTest {
 	 * @return
 	 */
 	private TransmissionTree getTransmissionTree1() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(0);
@@ -218,7 +218,7 @@ public class MaxMarginalDistributionCalculatorTest {
 	 * @return
 	 */
 	private TransmissionTree getTransmissionTree2() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(0);
@@ -249,7 +249,7 @@ public class MaxMarginalDistributionCalculatorTest {
 	 * @return
 	 */
 	private TransmissionTree getTransmissionTree3() {
-		TransmissionTree tree = TransmissionTreeFactory.buildTree();
+		TransmissionTree tree = TransmissionTreeFactory.buildHW2Tree();
 
 		Node node = tree.getNode(3);
 		node.setValue(1);

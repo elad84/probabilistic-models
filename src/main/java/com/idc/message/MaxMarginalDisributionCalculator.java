@@ -87,7 +87,6 @@ public class MaxMarginalDisributionCalculator {
 			for (Node child : node.getNeighbors()) {
 				// do not call the same node twice to avoid cycle calls
 				if (!child.equals(caller)) {
-					child.setParent(node);
 					ArgMaxBinaryMessage argMaxBinaryMessage = collect(child,
 							node);
 
