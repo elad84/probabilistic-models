@@ -19,6 +19,11 @@ public class TransmissionTree {
 		this.treeNodes = new HashMap<Integer, Node>();
 		this.edges = new HashMap<Edge, Double>();
 	}
+
+	public Double getEdgeWeight(Node first, Node second){
+		Edge edge = new Edge(first, second);
+		return this.edges.get(edge);
+	}
 	
 	/**
 	 * Add new edge to the tree

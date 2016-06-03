@@ -19,11 +19,13 @@ public class ParameterInferenceCalculator {
         this.sufficientStatistics = new SufficientStatistics();
     }
 
-    public void computeMLE(Node root){
+    public SufficientStatistics computeMLE(Node root){
         computeSufficientStatistics(root,null);
         sufficientStatistics.computeMLE();
         sufficientStatistics.computeLoglikelihood();
         sufficientStatistics.computeFlipProbabilities();
+
+        return sufficientStatistics;
 
     }
 

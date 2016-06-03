@@ -2,9 +2,7 @@ package com.idc.model;
 
 import javafx.util.Pair;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,4 +57,15 @@ public class ObservationsData {
         return bs.filter(x->i.hasNext()).map(b->new Integer[]{i.next(), b});
     }
 
+    public void calcVariable2Data(){
+        variable2Data = new HashMap<>();
+        data.stream().forEach(observationList -> {
+            for (int i=0;i<observationList.size();++i){
+                if (!variable2Data.containsKey(i)){
+                    variable2Data.put(i,new ArrayList<>());
+                }
+                variable2Data.get(i).add(observationList.get(i));
+            }
+        });
+    }
 }

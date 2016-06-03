@@ -128,7 +128,7 @@ public class MaxMarginalDisributionCalculator {
 			}
 			boolean argMaxStar = (psi.getValue(false) == mMax) ? false : true;
 
-			System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar + " " + message);
+			//System.out.println(node.getKey() + " m: " + mMax + " x*: "+ argMaxStar + " " + message);
 			starValues.put(node,argMaxStar);
 
 			return new ArgMaxBinaryMessage(message, null);
@@ -175,7 +175,7 @@ public class MaxMarginalDisributionCalculator {
 							: argMax.isZeroValue();
 					starValues.put(child, childStarValue);
 
-					System.out.println(child.getKey() + " x*: "+ childStarValue + " " + argMax + " " + messages.get(edge));
+					//System.out.println(child.getKey() + " x*: "+ childStarValue + " " + argMax + " " + messages.get(edge));
 					distribute(child);
 				}
 			}

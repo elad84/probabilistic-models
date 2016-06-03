@@ -18,6 +18,14 @@ public class SufficientStatistics {
 
     private Double loglikelihood;
 
+    public Map<KeyPair, Double> getNodeKey2FlipProbability() {
+        return nodeKey2FlipProbability;
+    }
+
+    public Double getLoglikelihood() {
+        return loglikelihood;
+    }
+
     public void setNodeKey2Count(int key, long nObservationsZero, long nObservationsOne) {
         KeyPair keyPair = new KeyPair();
         keyPair.key = key;
@@ -54,14 +62,14 @@ public class SufficientStatistics {
         Double loglikelihood = entryZeroStream.mapToDouble(e -> {
             Double[][] nProb = e.getValue();
             Long[][] nCounts = nodeKey2Count.get(e.getKey());
-            double p00 = Math.log(nProb[0][0]) * nCounts[0][0];
-            double p01 = Math.log(nProb[0][1]) * nCounts[0][1];
+            double p00 =  nCounts[0][0] == 0 ? 0 : Math.log(nProb[0][0]) * nCounts[0][0];
+            double p01 =  nCounts[0][1] == 0 ? 0 :  Math.log(nProb[0][1]) * nCounts[0][1];
             if (e.getKey().parentKey == null){
                 return p00 +p01;
             }
 
-            double p10 = Math.log(nProb[1][0]) * nCounts[1][0];
-            double p11 = Math.log(nProb[1][1]) * nCounts[1][1];
+            double p10 = nCounts[1][0] == 0 ? 0 : Math.log(nProb[1][0]) * nCounts[1][0];
+            double p11 =  nCounts[1][1] == 0 ? 0 : Math.log(nProb[1][1]) * nCounts[1][1];
             return p00 + p10  + p01 + p11;
         }).sum();
 

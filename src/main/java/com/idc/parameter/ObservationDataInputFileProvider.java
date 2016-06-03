@@ -39,8 +39,7 @@ public class ObservationDataInputFileProvider {
             observationsData.setData(data);
             observationsData.setVariables(variables);
 
-            Map<Integer, List<Integer>> variable2Data = getVariable2Data(data);
-            observationsData.setVariable2Data(variable2Data);
+            observationsData.calcVariable2Data();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,20 +51,6 @@ public class ObservationDataInputFileProvider {
             }
         }
         return observationsData;
-    }
-
-    private Map<Integer, List<Integer>> getVariable2Data(List<List<Integer>> data){
-        Map<Integer, List<Integer>> variable2Data = new HashMap<>();
-        data.stream().forEach(observationList -> {
-           for (int i=0;i<observationList.size();++i){
-                if (!variable2Data.containsKey(i)){
-                    variable2Data.put(i,new ArrayList<>());
-                }
-               variable2Data.get(i).add(observationList.get(i));
-            }
-        });
-        return variable2Data;
-
     }
 
     private List<Integer> getObservation(String[] observation) {

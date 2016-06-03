@@ -1,5 +1,6 @@
 package com.idc.model;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ import java.util.Set;
  * @author eladcohen
  *
  */
-public class Node {
+public class Node implements Comparable{
 	
 	/**
 	 * Indication whether this node is root
@@ -132,4 +133,9 @@ public class Node {
 		this.value = value;
 	}
 
+
+	@Override
+	public int compareTo(Object o) {
+		return this.getKey() - ((Node) o).getKey();
+	}
 }
