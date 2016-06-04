@@ -37,7 +37,7 @@ public class Node implements Comparable{
 	private int value;
 	
 	private Psi psi;
-	
+
 	private MarginalDisribution marginalDisribution;
 	
 	/**
@@ -91,6 +91,11 @@ public class Node implements Comparable{
 
 	public void setParent(Node parent) {
 		this.parent = parent;
+		for (Node neighbor : this.getNeighbors()) {
+			if (neighbor != this.parent) {
+				neighbor.setParent(this);
+			}
+		}
 	}
 
 	public boolean isRoot() {
@@ -137,5 +142,18 @@ public class Node implements Comparable{
 	@Override
 	public int compareTo(Object o) {
 		return this.getKey() - ((Node) o).getKey();
+	}
+
+	public double likelihood(TransmissionTree tree) {
+		double likelihood = 1;
+		for (Node neighbor : this.getNeighbors()) {
+			if (neighbor != this.parent) {
+				double p = tree.getEdgeWeight(new Edge(this, neighbor));
+				likelihood *= (value == neighbor.getValue() ? (1 - p) : p);
+				likelihood *= neighbor.likelihood(tree);
+
+			}
+		}
+		return likelihood;
 	}
 }

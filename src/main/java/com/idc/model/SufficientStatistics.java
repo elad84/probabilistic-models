@@ -1,5 +1,8 @@
 package com.idc.model;
 
+import com.idc.message.TransmissionTreeFactory;
+import com.idc.parameter.LikelihoodCalculator;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,16 +30,12 @@ public class SufficientStatistics {
     }
 
     public void setNodeKey2Count(int key, long nObservationsZero, long nObservationsOne) {
-        KeyPair keyPair = new KeyPair();
-        keyPair.key = key;
-
+        KeyPair keyPair = new KeyPair(key,null);
         nodeKey2Count.put(keyPair, new Long[][]{{nObservationsZero,nObservationsOne}});
     }
 
     public void setNodeKey2Count(int key, int parentKey, long nObservationsZeroParentZero, long nObservationsOneParentZero, long nObservationsZeroParentOne, long nObservationsOneParentOne) {
-        KeyPair keyPair0 = new KeyPair();
-        keyPair0.key = key;
-        keyPair0.parentKey = parentKey;
+        KeyPair keyPair0 = new KeyPair(key,parentKey);
         nodeKey2Count.put(keyPair0, new Long[][]{{ nObservationsZeroParentZero, nObservationsOneParentZero}, { nObservationsZeroParentOne, nObservationsOneParentOne}});
     }
 
@@ -57,32 +56,35 @@ public class SufficientStatistics {
                         }));
     }
 
-    public void computeLoglikelihood(){
-        Stream<Map.Entry<KeyPair, Double[][]>> entryZeroStream = nodeKey2CountMLE.entrySet().stream();
-        Double loglikelihood = entryZeroStream.mapToDouble(e -> {
-            Double[][] nProb = e.getValue();
-            Long[][] nCounts = nodeKey2Count.get(e.getKey());
-            double p00 =  nCounts[0][0] == 0 ? 0 : Math.log(nProb[0][0]) * nCounts[0][0];
-            double p01 =  nCounts[0][1] == 0 ? 0 :  Math.log(nProb[0][1]) * nCounts[0][1];
-            if (e.getKey().parentKey == null){
-                return p00 +p01;
-            }
-
-            double p10 = nCounts[1][0] == 0 ? 0 : Math.log(nProb[1][0]) * nCounts[1][0];
-            double p11 =  nCounts[1][1] == 0 ? 0 : Math.log(nProb[1][1]) * nCounts[1][1];
-            return p00 + p10  + p01 + p11;
-        }).sum();
-
-        this.loglikelihood = loglikelihood;
-    }
-
-
     public void computeFlipProbabilities(){
         Stream<Map.Entry<KeyPair, Double[][]>> entryStream = nodeKey2CountMLE.entrySet().stream().filter(e -> e.getKey().parentKey!=null);
         this.nodeKey2FlipProbability = entryStream.collect(Collectors.toMap(
                 e -> e.getKey(),
                 e ->  0.5 * ( e.getValue()[0][1] + e.getValue()[1][0])
         ));
+    }
+
+    public void computeLoglikelihood(ObservationsData observationsData, Node root){
+
+        Double[] weights = new Double[] {getFlipProbability(new KeyPair(1, 2)), getFlipProbability(new KeyPair(2,3)),
+                getFlipProbability(new KeyPair(2,4)), getFlipProbability(new KeyPair(1,5)),
+                getFlipProbability(new KeyPair(5,6)), getFlipProbability(new KeyPair(5,7)),
+                getFlipProbability(new KeyPair(1,8)), getFlipProbability(new KeyPair(8,9)),
+                getFlipProbability(new KeyPair(8,10))};
+
+        TransmissionTree transmissionTree = TransmissionTreeFactory.buildTree(weights);
+        Node treeRoot = transmissionTree.getNode(root.getKey());
+        treeRoot.setRoot(true);
+        treeRoot.setParent(null);
+        double loglikelihood = LikelihoodCalculator.calcLogLikelihood(transmissionTree, treeRoot, observationsData);
+        this.loglikelihood = loglikelihood;
+    }
+
+    private Double getFlipProbability(KeyPair keyPair) {
+        Double flipProb = nodeKey2FlipProbability.get(keyPair);
+        if (flipProb == null)
+            flipProb = nodeKey2FlipProbability.get(new KeyPair(keyPair.parentKey,keyPair.key));
+        return flipProb;
     }
 
     @Override
@@ -95,7 +97,7 @@ public class SufficientStatistics {
         });
 
         sbTitle.append("log-ld\n");
-        sb.append(loglikelihood);
+        sb.append(String.format("%.4f\t ", loglikelihood));
         sbTitle.append(sb);
         return sbTitle.toString();
     }
@@ -103,6 +105,30 @@ public class SufficientStatistics {
     public static class KeyPair{
         public Integer key;
         public Integer parentKey;
+
+        public KeyPair(Integer key, Integer parentKey) {
+            this.key = key;
+            this.parentKey = parentKey;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            KeyPair keyPair = (KeyPair) o;
+
+            if (!key.equals(keyPair.key)) return false;
+            return parentKey != null ? parentKey.equals(keyPair.parentKey) : keyPair.parentKey == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = key.hashCode();
+            result = 31 * result + (parentKey != null ? parentKey.hashCode() : 0);
+            return result;
+        }
 
         @Override
         public String toString() {
