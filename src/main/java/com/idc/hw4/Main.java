@@ -1,15 +1,11 @@
 package com.idc.hw4;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.idc.message.TransmissionTreeFactory;
@@ -38,15 +34,23 @@ public class Main {
 
 	}
 
+	/**
+	 * Print the inferred data from a file with observations
+	 * 
+	 * @param dataFilePath
+	 */
 	public static void inferenceFromCompleteData(String dataFilePath) {
 		TransmissionTree tree = TransmissionTreeFactory.buildHW3Tree();
 
+		//read all observations
 		List<HashMap<Node, Integer>> observations = readObservations(tree,
 				dataFilePath);
 
 		Set<Edge> edges = tree.getEdges().keySet();
+		//iterate over all edges and calculate probability
 		for (Edge edge : edges) {
 			int countFlips = 0;
+			//for every edge run on all observations and count data flips 
 			for (HashMap<Node, Integer> observation : observations) {
 				Integer firstValue = observation.get(edge.getFirstNode());
 				Integer socondValue = observation.get(edge.getSecondNode());
@@ -70,11 +74,20 @@ public class Main {
 
 	}
 
+	/**
+	 * Calculates the log likelihood for given observations
+	 * with tree
+	 * 
+	 * @param tree
+	 * @param observations
+	 * @return
+	 */
 	private static double calcLogLikelihood(TransmissionTree tree,
 			List<HashMap<Node, Integer>> observations) {
 		double logLikelihood = 0;
 		for (HashMap<Node, Integer> observation : observations) {
 			tree.setValues(observation);
+			//for every observation calculate likelihood
 			logLikelihood += tree.logLikelihood();
 		}
 		return logLikelihood;

@@ -129,8 +129,13 @@ public class Node {
 		this.value = value;
 	}
 
+	/**
+	 * Calculates likelihood for {@link Node} is recursive
+	 * @return
+	 */
 	public double likelihood() {
 		double likelihood = 1;
+		//iterate over neighbors and get likelihood
 		for (Node neighbor : this.getNeighbors()) {
 			if (neighbor != this.parent) {
 				double p = tree.getEdgeWeight(new Edge(this, neighbor));
