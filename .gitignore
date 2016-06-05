@@ -27,5 +27,4 @@ test-output/
 *.css.map
 *.css
 .sass-cache/
-.classpath
 
