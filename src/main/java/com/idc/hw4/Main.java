@@ -46,6 +46,24 @@ public class Main {
 		List<HashMap<Node, Integer>> observations = readObservations(tree,
 				dataFilePath);
 
+		inferFromCompleteData(tree, observations);
+
+		// print results
+		Set<Edge> edges = tree.getEdges().keySet();
+		for (Edge edge : edges) {
+			System.out.print("p" + edge.getFirstNode().getKey() + "-"
+					+ edge.getSecondNode().getKey() + "\t");
+		}
+		System.out.println("\tlog-ld");
+		for (Edge edge : edges) {
+			System.out.print(tree.getEdgeWeight(edge) + "\t");
+		}
+		System.out.println("\t" + calcLogLikelihood(tree, observations));
+
+	}
+
+	public static void inferFromCompleteData(TransmissionTree tree,
+			List<HashMap<Node, Integer>> observations) {
 		Set<Edge> edges = tree.getEdges().keySet();
 		//iterate over all edges and calculate probability
 		for (Edge edge : edges) {
@@ -60,18 +78,6 @@ public class Main {
 
 			tree.setEdgeWeight((double) countFlips / observations.size(), edge);
 		}
-
-		// print results
-		for (Edge edge : edges) {
-			System.out.print("p" + edge.getFirstNode().getKey() + "-"
-					+ edge.getSecondNode().getKey() + "\t");
-		}
-		System.out.println("\tlog-ld");
-		for (Edge edge : edges) {
-			System.out.print(tree.getEdgeWeight(edge) + "\t");
-		}
-		System.out.println("\t" + calcLogLikelihood(tree, observations));
-
 	}
 
 	/**
