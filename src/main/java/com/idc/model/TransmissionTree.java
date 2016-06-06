@@ -167,4 +167,8 @@ public class TransmissionTree {
 		return Math.log(0.5 * root.likelihood());
 	}
 
+	public Node getRoot() {
+		return root;
+	}
+
 }
