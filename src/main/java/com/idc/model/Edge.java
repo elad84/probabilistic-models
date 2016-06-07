@@ -18,10 +18,13 @@ public class Edge {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int a = ((firstNode == null) ? 0 : firstNode.hashCode())
-				+ ((secondNode == null) ? 0 : secondNode.hashCode());
-		return prime * a;
+		final int prime = 331;
+		int firstHash = firstNode.hashCode();
+		int secondHash = secondNode.hashCode();
+		if (firstHash < secondHash) {
+			return prime * firstHash + secondHash;
+		}
+		return prime * secondHash + firstHash;
 	}
 
 	@Override
