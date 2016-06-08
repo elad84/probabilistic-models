@@ -49,10 +49,10 @@ public class MarginalDisributionCalculator {
 		collect(root, null);
 		distribute(root, null);
 
-//		System.out
-//				.println("P(XA): "
-//						+ (root.getPsi().getValue(false) + root.getPsi()
-//								.getValue(true)));
+		// System.out
+		// .println("P(XA): "
+		// + (root.getPsi().getValue(false) + root.getPsi()
+		// .getValue(true)));
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class MarginalDisributionCalculator {
 	 */
 	public BinaryMessage collect(Node node, Node caller)
 			throws IllegalAccessException {
-//		System.out.println("passing message from node: " + node);
+		// System.out.println("passing message from node: " + node);
 		if (logger.isDebugEnabled()) {
 			logger.debug("running collect for node: " + node);
 		}
@@ -153,21 +153,30 @@ public class MarginalDisributionCalculator {
 		node.setMarginalDisribution(new MarginalDisribution(zero, one));
 
 		if (!node.isLeaf()) {
-			// iterate over children, for each one calculate the message from 
-			//parent and distribute the message to child
+			// iterate over children, for each one calculate the message from
+			// parent and distribute the message to child
 			for (Node child : node.getNeighbors()) {
 				if (node.getParent() == null || !node.getParent().equals(child)) {
 					Edge edge = new Edge(child, node);
 					BinaryMessage childMessage = messages.get(edge);
-					double edgeFlipProbability = tree.getEdgeWeight(edge);
-					double zeroParentMessage = (1 - edgeFlipProbability) * zero
-							/ childMessage.getValue(false)
-							+ edgeFlipProbability * one
-							/ childMessage.getValue(true);
-					double oneParentMessage = edgeFlipProbability * zero
-							/ childMessage.getValue(false)
-							+ (1 - edgeFlipProbability) * one
-							/ childMessage.getValue(true);
+					double flipProb = tree.getEdgeWeight(edge);
+
+					double zeroParentMessage = 0;
+					double oneParentMessage = 0;
+					if (childMessage.getValue(false) != 0) {
+						zeroParentMessage += (1 - flipProb) * zero
+								/ childMessage.getValue(false);
+						oneParentMessage += flipProb * zero
+								/ childMessage.getValue(false);
+
+					}
+					if (childMessage.getValue(true) != 0) {
+						zeroParentMessage += flipProb * one
+								/ childMessage.getValue(true);
+						oneParentMessage += (1 - flipProb) * one
+								/ childMessage.getValue(true);
+
+					}
 					distribute(child, new BinaryMessage(zeroParentMessage,
 							oneParentMessage));
 				}

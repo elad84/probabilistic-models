@@ -36,6 +36,16 @@ public class Main {
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 
+//		args[2] = "0.098";
+//		args[3] = "0.590";
+//		args[4] = "0.000";
+//		args[5] = "0.066";
+//		args[6] = "0.081";
+//		args[7] = "0.197";
+//		args[8] = "0.041";
+//		args[9] = "0.288";
+//		args[10] = "0.036";
+		
 		switch (args[0]) {
 		case "C":
 			inferenceFromCompleteData(args[1]);
