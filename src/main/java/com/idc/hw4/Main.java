@@ -98,12 +98,16 @@ public class Main {
 
 		do {
 
+			double dataProbability = calcLogLikelihood(tree, inferedObservations);
+			
 			for (int i = 0; i < observations.size(); i++) {
 				HashMap<Node, Double> observation = observations.get(i);
 				tree.setValues(observation);
 				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
 						tree);
 				marginalDisributionCalculator.computeMarginals(tree.getRoot());
+				
+				
 				Map<Integer, MarginalDisribution> marginalDisributionsMap = tree
 						.getNodesMarginalDisribution();
 				for (Integer key : marginalDisributionsMap.keySet()) {
@@ -131,7 +135,7 @@ public class Main {
 			}
 
 			double dataLikelihood = calcLogLikelihood(tree, inferedObservations);
-			double dataProbability = 0;
+//			double dataProbability = 0;
 
 			// print results
 			for (Edge edge : edgesOrdered) {
