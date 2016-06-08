@@ -49,10 +49,10 @@ public class MarginalDisributionCalculator {
 		collect(root, null);
 		distribute(root, null);
 
-		System.out
-				.println("P(XA): "
-						+ (root.getPsi().getValue(false) + root.getPsi()
-								.getValue(true)));
+//		System.out
+//				.println("P(XA): "
+//						+ (root.getPsi().getValue(false) + root.getPsi()
+//								.getValue(true)));
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class MarginalDisributionCalculator {
 	 */
 	public BinaryMessage collect(Node node, Node caller)
 			throws IllegalAccessException {
-		System.out.println("passing message from node: " + node);
+//		System.out.println("passing message from node: " + node);
 		if (logger.isDebugEnabled()) {
 			logger.debug("running collect for node: " + node);
 		}

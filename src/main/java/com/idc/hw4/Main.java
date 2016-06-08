@@ -59,52 +59,6 @@ public class Main {
 			tree.setEdgeWeight(p810, tree.getNode(8), tree.getNode(10));
 
 			Set<Edge> edges = tree.getEdges().keySet();
-			// int edgeInt;
-			// //set probability for all edges
-			// for (Edge edge : edges) {
-			// edgeInt = 10 * edge.getFirstNode().getKey() +
-			// edge.getSecondNode().getKey();
-			// switch(edgeInt){
-			// case 12:
-			// case 21:
-			// tree.setEdgeWeight(p12, edge);
-			// break;
-			// case 15:
-			// case 51:
-			// tree.setEdgeWeight(p15, edge);
-			// break;
-			// case 23:
-			// case 32:
-			// tree.setEdgeWeight(p23, edge);
-			// break;
-			// case 24:
-			// case 42:
-			// tree.setEdgeWeight(p24, edge);
-			// break;
-			// case 56:
-			// case 65:
-			// tree.setEdgeWeight(p56, edge);
-			// break;
-			// case 57:
-			// case 75:
-			// tree.setEdgeWeight(p57, edge);
-			// break;
-			// case 18:
-			// case 81:
-			// tree.setEdgeWeight(p18, edge);
-			// break;
-			// case 89:
-			// case 98:
-			// tree.setEdgeWeight(p89, edge);
-			// break;
-			// case 108:
-			// case 90:
-			// tree.setEdgeWeight(p810, edge);
-			// break;
-			// default:
-			// throw new IllegalArgumentException("no such edge found");
-			// }
-			// }
 			
 			double dataLikelihood = calcLogLikelihood(tree, observations);
 			double lastProb = 0;
