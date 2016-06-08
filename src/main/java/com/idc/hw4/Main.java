@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.idc.message.MarginalDisributionCalculator;
@@ -25,93 +26,7 @@ public class Main {
 			inferenceFromCompleteData(args[1]);
 			break;
 		case "M":
-			if (args.length < 11) {
-				throw new IllegalArgumentException(
-						"must supply with initial settings for model parameters");
-			}
-
-			String dataFilePath = args[1];
-
-			double p12 = Double.valueOf(args[2]);
-			double p23 = Double.valueOf(args[3]);
-			double p24 = Double.valueOf(args[4]);
-			double p15 = Double.valueOf(args[5]);
-			double p56 = Double.valueOf(args[6]);
-			double p57 = Double.valueOf(args[7]);
-			double p18 = Double.valueOf(args[8]);
-			double p89 = Double.valueOf(args[9]);
-			double p810 = Double.valueOf(args[10]);
-
-			TransmissionTree tree = TransmissionTreeFactory.buildHW3Tree();
-
-			// read all observations
-			List<HashMap<Node, Integer>> observations = readObservations(tree,
-					dataFilePath);
-
-			ArrayList<Edge> edgesOrdered = new ArrayList<Edge>();
-			edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(2)));
-			edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(3)));
-			edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(4)));
-			edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(5)));
-			edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(6)));
-			edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(7)));
-			edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(8)));
-			edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
-			edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
-
-			tree.setEdgeWeight(p12, edgesOrdered.get(0));
-			tree.setEdgeWeight(p23, edgesOrdered.get(1));
-			tree.setEdgeWeight(p24, edgesOrdered.get(2));
-			tree.setEdgeWeight(p15, edgesOrdered.get(3));
-			tree.setEdgeWeight(p56, edgesOrdered.get(4));
-			tree.setEdgeWeight(p57, edgesOrdered.get(5));
-			tree.setEdgeWeight(p18, edgesOrdered.get(6));
-			tree.setEdgeWeight(p89, edgesOrdered.get(7));
-			tree.setEdgeWeight(p810, edgesOrdered.get(8));
-
-			Set<Edge> edges = tree.getEdges().keySet();
-
-			double dataLikelihood = calcLogLikelihood(tree, observations);
-			double lastProb = 0;
-
-			do {
-
-				dataLikelihood = calcLogLikelihood(tree, observations);
-				if (Math.abs(lastProb - dataLikelihood) < 0.001) {
-					break;
-				}
-				for (HashMap<Node, Integer> observation : observations) {
-					tree.setValues(observation);
-					MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
-							tree);
-					marginalDisributionCalculator.computeMarginals(tree
-							.getRoot());
-					Map<Integer, MarginalDisribution> map = tree
-							.getNodesMarginalDisribution();
-					for (Integer key : map.keySet()) {
-						double prob0 = map.get(key).getValue(false);
-						double prob1 = map.get(key).getValue(true);
-						observation.put(tree.getNode(key), prob1 > prob0 ? 1
-								: 0);
-					}
-				}
-				inferFromCompleteData(tree, observations);
-
-				// print results
-				for (Edge edge : edgesOrdered) {
-					System.out.print("p" + edge.getFirstNode().getKey() + "-"
-							+ edge.getSecondNode().getKey() + "\t");
-				}
-				System.out.print("\tlog-prob");
-				System.out.println("\t\tlog-ld");
-				for (Edge edge : edgesOrdered) {
-					System.out.print(tree.getEdgeWeight(edge) + "\t");
-				}
-				System.out.print("\t" + dataLikelihood);
-				System.out
-						.println("\t" + calcLogLikelihood(tree, observations));
-
-			} while (false);
+			maxInferance(args);
 
 			break;
 		case "E":
@@ -122,6 +37,119 @@ public class Main {
 			break;
 		}
 
+	}
+
+	public static void maxInferance(String[] args)
+			throws IllegalAccessException {
+		if (args.length < 11) {
+			throw new IllegalArgumentException(
+					"must supply with initial settings for model parameters");
+		}
+
+		String dataFilePath = args[1];
+
+		double p12 = Double.valueOf(args[2]);
+		double p23 = Double.valueOf(args[3]);
+		double p24 = Double.valueOf(args[4]);
+		double p15 = Double.valueOf(args[5]);
+		double p56 = Double.valueOf(args[6]);
+		double p57 = Double.valueOf(args[7]);
+		double p18 = Double.valueOf(args[8]);
+		double p89 = Double.valueOf(args[9]);
+		double p810 = Double.valueOf(args[10]);
+
+		TransmissionTree tree = TransmissionTreeFactory.buildHW3Tree();
+
+		// read all observations
+		List<HashMap<Node, Integer>> observations = readObservations(tree,
+				dataFilePath);
+
+		ArrayList<Edge> edgesOrdered = new ArrayList<Edge>();
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(2)));
+		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(3)));
+		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(4)));
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(5)));
+		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(6)));
+		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(7)));
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(8)));
+		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
+		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
+
+		tree.setEdgeWeight(p12, edgesOrdered.get(0));
+		tree.setEdgeWeight(p23, edgesOrdered.get(1));
+		tree.setEdgeWeight(p24, edgesOrdered.get(2));
+		tree.setEdgeWeight(p15, edgesOrdered.get(3));
+		tree.setEdgeWeight(p56, edgesOrdered.get(4));
+		tree.setEdgeWeight(p57, edgesOrdered.get(5));
+		tree.setEdgeWeight(p18, edgesOrdered.get(6));
+		tree.setEdgeWeight(p89, edgesOrdered.get(7));
+		tree.setEdgeWeight(p810, edgesOrdered.get(8));
+
+
+		double dataLikelihood = calcLogLikelihood(tree, observations);
+		double lastProb = 0;
+
+		// print header
+		for (Edge edge : edgesOrdered) {
+			System.out.print("p" + edge.getFirstNode().getKey() + "-"
+					+ edge.getSecondNode().getKey() + "\t");
+		}
+		System.out.print("\tlog-prob");
+		System.out.println("\t\tlog-ld");
+
+		List<HashMap<Node, Integer>> inferedObservations = copyObservations(observations);
+
+		do {
+			dataLikelihood = calcLogLikelihood(tree, observations);
+			if (Math.abs(lastProb - dataLikelihood) < 0.001) {
+				break;
+			}
+			for (int i = 0; i < observations.size(); i++) {
+				HashMap<Node, Integer> observation = observations.get(i);
+				tree.setValues(observation);
+				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
+						tree);
+				marginalDisributionCalculator.computeMarginals(tree
+						.getRoot());
+				Map<Integer, MarginalDisribution> map = tree
+						.getNodesMarginalDisribution();
+				for (Integer key : map.keySet()) {
+					HashMap<Node, Integer> inferedObservation = inferedObservations
+							.get(i);
+					double prob0 = map.get(key).getValue(false);
+					double prob1 = map.get(key).getValue(true);
+					if (key == 1) {
+						inferedObservation.put(tree.getNode(key),
+								prob1 >= prob0 ? 1 : 0);
+					} else
+						inferedObservation.put(tree.getNode(key),
+								prob1 > prob0 ? 1 : 0);
+				}
+			}
+			inferFromCompleteData(tree, inferedObservations);
+
+			// print results
+			for (Edge edge : edgesOrdered) {
+				System.out.print(tree.getEdgeWeight(edge) + "\t");
+			}
+			System.out.print("\t" + dataLikelihood);
+			System.out
+					.println("\t" + calcLogLikelihood(tree, observations));
+
+		} while (true);
+	}
+
+	public static List<HashMap<Node, Integer>> copyObservations(
+			List<HashMap<Node, Integer>> observations) {
+		List<HashMap<Node, Integer>> copyObservations = new ArrayList<HashMap<Node, Integer>>();
+		for (HashMap<Node, Integer> observation : observations) {
+			HashMap<Node, Integer> copyObservation = new HashMap<Node, Integer>();
+			for (Entry<Node, Integer> e : observation.entrySet()) {
+				copyObservation.put(e.getKey(), e.getValue());
+			}
+			copyObservations.add(copyObservation);
+		}
+		return copyObservations;
 	}
 
 	/**
@@ -194,7 +222,6 @@ public class Main {
 		try {
 			lines = Files.readAllLines(Paths.get(dataFilePath));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
