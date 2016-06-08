@@ -122,12 +122,9 @@ public class Main {
 							.get(i);
 					MarginalDisribution marginalDisribution = marginalDisributionsMap
 							.get(key);
-					double prob0 = marginalDisribution.getValue(false);
-					double prob1 = marginalDisribution.getValue(true);
-					if (key == 1) {
-						likelihood = prob1 + prob0;
-					}
 					if (args[0].equals("M")) {
+						double prob0 = marginalDisribution.getValue(false);
+						double prob1 = marginalDisribution.getValue(true);
 						if (key == 1) {
 							inferedObservation.put(tree.getNode(key),
 									prob1 >= prob0 ? 1.0 : 0.0);
@@ -142,7 +139,12 @@ public class Main {
 						inferedObservation.put(tree.getNode(key), dist[1]);
 					}
 				}
-				dataLikelihood += Math.log(likelihood);
+
+				MarginalDisribution marginalDisribution = marginalDisributionsMap
+						.get(1);
+				double prob0 = marginalDisribution.getValue(false);
+				double prob1 = marginalDisribution.getValue(true);
+				dataLikelihood += Math.log(prob0 + prob1);
 			}
 
 			// calculate the log probability of the complete data
