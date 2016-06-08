@@ -95,31 +95,43 @@ public class Main {
 			}
 			
 			double dataLikelihood = calcLogLikelihood(tree, observations);
+			double lastProb = 0;
 			
-			for(HashMap<Node, Integer> observation  : observations){
-				tree.setValues(observation);
-				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(tree);
-				marginalDisributionCalculator.computeMarginals(tree.getRoot());
-				Map<Integer, MarginalDisribution> map = tree.getNodesMarginalDisribution();
-				for(Integer key : map.keySet()){
-					observation.put(tree.getNode(key), map.get(key).getValue(true) > map.get(key).getValue(false) ? 1 : 
-						map.get(key).getValue(true) == map.get(key).getValue(false) ? 1 : 0);
+			while(true){
+				
+				dataLikelihood = calcLogLikelihood(tree, observations);
+				if(Math.abs(lastProb - dataLikelihood) < 0.001){
+					break;
 				}
+				for(HashMap<Node, Integer> observation  : observations){
+					tree.setValues(observation);
+					MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(tree);
+					marginalDisributionCalculator.computeMarginals(tree.getRoot());
+					Map<Integer, MarginalDisribution> map = tree.getNodesMarginalDisribution();
+					for(Integer key : map.keySet()){
+						observation.put(tree.getNode(key), map.get(key).getValue(true) > map.get(key).getValue(false) ? 1 : 
+							map.get(key).getValue(true) == map.get(key).getValue(false) ? 1 : 0);
+					}
+				}
+				
+
+				// print results
+				for (Edge edge : edges) {
+					System.out.print("p" + edge.getFirstNode().getKey() + "-"
+							+ edge.getSecondNode().getKey() + "\t");
+				}
+				System.out.print("\tlog-prob");
+				System.out.println("\t\tlog-ld");
+				for (Edge edge : edges) {
+					System.out.print(tree.getEdgeWeight(edge) + "\t");
+				}
+				System.out.print("\t" + dataLikelihood);
+				System.out.println("\t" + calcLogLikelihood(tree, observations));
+				
+				inferFromCompleteData(tree, observations);
 			}
 			
-
-			// print results
-			for (Edge edge : edges) {
-				System.out.print("p" + edge.getFirstNode().getKey() + "-"
-						+ edge.getSecondNode().getKey() + "\t");
-			}
-			System.out.print("\tlog-prob");
-			System.out.println("\t\tlog-ld");
-			for (Edge edge : edges) {
-				System.out.print(tree.getEdgeWeight(edge) + "\t");
-			}
-			System.out.print("\t" + dataLikelihood);
-			System.out.println("\t" + calcLogLikelihood(tree, observations));
+			
 			break;
 		case "E":
 
