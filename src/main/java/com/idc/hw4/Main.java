@@ -59,6 +59,7 @@ public class Main {
 
 		String dataFilePath = args[1];
 
+		//get initial edges probabilities
 		double p12 = Double.valueOf(args[2]);
 		double p23 = Double.valueOf(args[3]);
 		double p24 = Double.valueOf(args[4]);
@@ -97,12 +98,16 @@ public class Main {
 		List<HashMap<Node, Double>> inferedObservations = copyObservations(observations);
 
 		do {
-
-			double dataProbability = calcLogLikelihood(tree, inferedObservations);
 			
+			//iterate over all observations
 			for (int i = 0; i < observations.size(); i++) {
+				
 				HashMap<Node, Double> observation = observations.get(i);
+				
+				//initialize the tree with the current observation
 				tree.setValues(observation);
+				
+				//compute marginal probabilities for all the nodes 
 				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
 						tree);
 				marginalDisributionCalculator.computeMarginals(tree.getRoot());
@@ -110,6 +115,7 @@ public class Main {
 				
 				Map<Integer, MarginalDisribution> marginalDisributionsMap = tree
 						.getNodesMarginalDisribution();
+				//inference hidden RVs  
 				for (Integer key : marginalDisributionsMap.keySet()) {
 					HashMap<Node, Double> inferedObservation = inferedObservations
 							.get(i);
@@ -133,9 +139,11 @@ public class Main {
 					}
 				}
 			}
-
+			
+			//calculate the log probability of the complete data
 			double dataLikelihood = calcLogLikelihood(tree, inferedObservations);
-//			double dataProbability = 0;
+			
+			double dataProbability = 0;
 
 			// print results
 			for (Edge edge : edgesOrdered) {
@@ -149,9 +157,12 @@ public class Main {
 			// else
 			// if (dataProbability - prevProbability < 0.001)
 			// break;
+			
+			//save likelihood
 			prevLikelihood = dataLikelihood;
 			prevProbability = dataProbability;
 
+			//update the parameters with the inferred hidden RVs and observed RVs
 			inferFromCompleteData(tree, inferedObservations, args[0]);
 
 		} while (true);
