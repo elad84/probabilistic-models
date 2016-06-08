@@ -19,27 +19,38 @@ import com.idc.model.TransmissionTree;
 
 public class Main {
 
+	private static ArrayList<Edge> edgesOrdered;
+	private static TransmissionTree tree;
+
 	public static void main(String[] args) throws IllegalAccessException {
+
+		tree = TransmissionTreeFactory.buildHW3Tree();
+		edgesOrdered = new ArrayList<Edge>();
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(2)));
+		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(3)));
+		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(4)));
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(5)));
+		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(6)));
+		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(7)));
+		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(8)));
+		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
+		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 
 		switch (args[0]) {
 		case "C":
 			inferenceFromCompleteData(args[1]);
 			break;
 		case "M":
-			maxInferance(args);
-
-			break;
 		case "E":
-
+			inferenceFromPartialData(args);
 			break;
-
 		default:
 			break;
 		}
 
 	}
 
-	public static void maxInferance(String[] args)
+	public static void inferenceFromPartialData(String[] args)
 			throws IllegalAccessException {
 		if (args.length < 11) {
 			throw new IllegalArgumentException(
@@ -58,22 +69,9 @@ public class Main {
 		double p89 = Double.valueOf(args[9]);
 		double p810 = Double.valueOf(args[10]);
 
-		TransmissionTree tree = TransmissionTreeFactory.buildHW3Tree();
-
 		// read all observations
-		List<HashMap<Node, Integer>> observations = readObservations(tree,
+		List<HashMap<Node, Double>> observations = readObservations(tree,
 				dataFilePath);
-
-		ArrayList<Edge> edgesOrdered = new ArrayList<Edge>();
-		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(2)));
-		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(3)));
-		edgesOrdered.add(new Edge(tree.getNode(2), tree.getNode(4)));
-		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(5)));
-		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(6)));
-		edgesOrdered.add(new Edge(tree.getNode(5), tree.getNode(7)));
-		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(8)));
-		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
-		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 
 		tree.setEdgeWeight(p12, edgesOrdered.get(0));
 		tree.setEdgeWeight(p23, edgesOrdered.get(1));
@@ -85,9 +83,8 @@ public class Main {
 		tree.setEdgeWeight(p89, edgesOrdered.get(7));
 		tree.setEdgeWeight(p810, edgesOrdered.get(8));
 
-
-		double dataLikelihood = calcLogLikelihood(tree, observations);
-		double lastProb = 0;
+		double prevLikelihood = -999999999;
+		double prevProbability = 1;
 
 		// print header
 		for (Edge edge : edgesOrdered) {
@@ -97,55 +94,72 @@ public class Main {
 		System.out.print("\tlog-prob");
 		System.out.println("\t\tlog-ld");
 
-		List<HashMap<Node, Integer>> inferedObservations = copyObservations(observations);
+		List<HashMap<Node, Double>> inferedObservations = copyObservations(observations);
 
 		do {
-			dataLikelihood = calcLogLikelihood(tree, observations);
-			if (Math.abs(lastProb - dataLikelihood) < 0.001) {
-				break;
-			}
+
 			for (int i = 0; i < observations.size(); i++) {
-				HashMap<Node, Integer> observation = observations.get(i);
+				HashMap<Node, Double> observation = observations.get(i);
 				tree.setValues(observation);
 				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
 						tree);
-				marginalDisributionCalculator.computeMarginals(tree
-						.getRoot());
-				Map<Integer, MarginalDisribution> map = tree
+				marginalDisributionCalculator.computeMarginals(tree.getRoot());
+				Map<Integer, MarginalDisribution> marginalDisributionsMap = tree
 						.getNodesMarginalDisribution();
-				for (Integer key : map.keySet()) {
-					HashMap<Node, Integer> inferedObservation = inferedObservations
+				for (Integer key : marginalDisributionsMap.keySet()) {
+					HashMap<Node, Double> inferedObservation = inferedObservations
 							.get(i);
-					double prob0 = map.get(key).getValue(false);
-					double prob1 = map.get(key).getValue(true);
-					if (key == 1) {
-						inferedObservation.put(tree.getNode(key),
-								prob1 >= prob0 ? 1 : 0);
-					} else
-						inferedObservation.put(tree.getNode(key),
-								prob1 > prob0 ? 1 : 0);
+					MarginalDisribution marginalDisribution = marginalDisributionsMap
+							.get(key);
+					if (args[0].equals("M")) {
+						double prob0 = marginalDisribution.getValue(false);
+						double prob1 = marginalDisribution.getValue(true);
+						if (key == 1) {
+							inferedObservation.put(tree.getNode(key),
+									prob1 >= prob0 ? 1.0 : 0.0);
+						} else
+							inferedObservation.put(tree.getNode(key),
+									prob1 > prob0 ? 1.0 : 0.0);
+					} else { // args[0].equals("E")
+						// the expectation of an indicator is the probability it
+						// equals 1
+						double[] dist = marginalDisribution
+								.getNormalizedMarginalDisribution();
+						inferedObservation.put(tree.getNode(key), dist[1]);
+					}
 				}
 			}
-			inferFromCompleteData(tree, inferedObservations);
+
+			double dataLikelihood = calcLogLikelihood(tree, inferedObservations);
+			double dataProbability = 0;
 
 			// print results
 			for (Edge edge : edgesOrdered) {
-				System.out.print(tree.getEdgeWeight(edge) + "\t");
+				System.out.printf("%.3f\t", tree.getEdgeWeight(edge));
 			}
 			System.out.print("\t" + dataLikelihood);
-			System.out
-					.println("\t" + calcLogLikelihood(tree, observations));
+			System.out.println("\t" + dataProbability);
+			// if (args[0].equals("M"))
+			if (dataLikelihood - prevLikelihood < 0.001)
+				break;
+			// else
+			// if (dataProbability - prevProbability < 0.001)
+			// break;
+			prevLikelihood = dataLikelihood;
+			prevProbability = dataProbability;
+
+			inferFromCompleteData(tree, inferedObservations, args[0]);
 
 		} while (true);
 	}
 
-	public static List<HashMap<Node, Integer>> copyObservations(
-			List<HashMap<Node, Integer>> observations) {
-		List<HashMap<Node, Integer>> copyObservations = new ArrayList<HashMap<Node, Integer>>();
-		for (HashMap<Node, Integer> observation : observations) {
-			HashMap<Node, Integer> copyObservation = new HashMap<Node, Integer>();
-			for (Entry<Node, Integer> e : observation.entrySet()) {
-				copyObservation.put(e.getKey(), e.getValue());
+	public static List<HashMap<Node, Double>> copyObservations(
+			List<HashMap<Node, Double>> observations) {
+		List<HashMap<Node, Double>> copyObservations = new ArrayList<HashMap<Node, Double>>();
+		for (HashMap<Node, Double> observation : observations) {
+			HashMap<Node, Double> copyObservation = new HashMap<Node, Double>();
+			for (Entry<Node, Double> e : observation.entrySet()) {
+				copyObservation.put(e.getKey(), new Double(e.getValue()));
 			}
 			copyObservations.add(copyObservation);
 		}
@@ -158,40 +172,49 @@ public class Main {
 	 * @param dataFilePath
 	 */
 	public static void inferenceFromCompleteData(String dataFilePath) {
-		TransmissionTree tree = TransmissionTreeFactory.buildHW3Tree();
-
 		// read all observations
-		List<HashMap<Node, Integer>> observations = readObservations(tree,
+		List<HashMap<Node, Double>> observations = readObservations(tree,
 				dataFilePath);
 
-		inferFromCompleteData(tree, observations);
+		inferFromCompleteData(tree, observations, "C");
 
 		// print results
-		Set<Edge> edges = tree.getEdges().keySet();
-		for (Edge edge : edges) {
+		for (Edge edge : edgesOrdered) {
 			System.out.print("p" + edge.getFirstNode().getKey() + "-"
 					+ edge.getSecondNode().getKey() + "\t");
 		}
 		System.out.println("\tlog-ld");
-		for (Edge edge : edges) {
-			System.out.print(tree.getEdgeWeight(edge) + "\t");
+		for (Edge edge : edgesOrdered) {
+			System.out.printf("%.3f\t", tree.getEdgeWeight(edge));
 		}
 		System.out.println("\t" + calcLogLikelihood(tree, observations));
 
 	}
 
 	public static void inferFromCompleteData(TransmissionTree tree,
-			List<HashMap<Node, Integer>> observations) {
+			List<HashMap<Node, Double>> observations, String option) {
 		Set<Edge> edges = tree.getEdges().keySet();
 		// iterate over all edges and calculate probability
 		for (Edge edge : edges) {
-			int countFlips = 0;
+			double countFlips = 0;
 			// for every edge run on all observations and count data flips
-			for (HashMap<Node, Integer> observation : observations) {
-				Integer firstValue = observation.get(edge.getFirstNode());
-				Integer socondValue = observation.get(edge.getSecondNode());
-				if (firstValue != socondValue)
-					countFlips++;
+			for (HashMap<Node, Double> observation : observations) {
+				Double firstValue = observation.get(edge.getFirstNode());
+				Double socondValue = observation.get(edge.getSecondNode());
+
+				switch (option) {
+				case "C":
+				case "M":
+					if (Math.abs(firstValue - socondValue) > 0.0001)
+						countFlips++;
+					break;
+
+				case "E":
+					countFlips += Math.abs(firstValue - socondValue);
+					break;
+				default:
+					break;
+				}
 			}
 
 			tree.setEdgeWeight((double) countFlips / observations.size(), edge);
@@ -206,9 +229,9 @@ public class Main {
 	 * @return
 	 */
 	private static double calcLogLikelihood(TransmissionTree tree,
-			List<HashMap<Node, Integer>> observations) {
+			List<HashMap<Node, Double>> observations) {
 		double logLikelihood = 0;
-		for (HashMap<Node, Integer> observation : observations) {
+		for (HashMap<Node, Double> observation : observations) {
 			tree.setValues(observation);
 			// for every observation calculate likelihood
 			logLikelihood += tree.logLikelihood();
@@ -216,7 +239,7 @@ public class Main {
 		return logLikelihood;
 	}
 
-	private static List<HashMap<Node, Integer>> readObservations(
+	private static List<HashMap<Node, Double>> readObservations(
 			TransmissionTree tree, String dataFilePath) {
 		List<String> lines = null;
 		try {
@@ -237,14 +260,14 @@ public class Main {
 			observedNodes[i] = tree.getNode(keys[i]);
 		}
 
-		List<HashMap<Node, Integer>> observations = new ArrayList<HashMap<Node, Integer>>();
+		List<HashMap<Node, Double>> observations = new ArrayList<HashMap<Node, Double>>();
 		for (int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
-			HashMap<Node, Integer> observation = new HashMap<Node, Integer>();
+			HashMap<Node, Double> observation = new HashMap<Node, Double>();
 			String[] observationStr = line.split("\t");
 			for (int j = 0; j < observationStr.length; j++) {
 				observation.put(observedNodes[j],
-						Integer.parseInt(observationStr[j]));
+						Double.parseDouble(observationStr[j]));
 			}
 			observations.add(observation);
 		}

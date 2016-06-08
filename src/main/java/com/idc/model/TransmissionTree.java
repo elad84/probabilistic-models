@@ -38,7 +38,7 @@ public class TransmissionTree {
 	public void addEdge(double weight, Node first, Node second) {
 		// add edge in both directions
 		Edge edge = new Edge(first, second);
-//		edges.put(new Edge(second, first), weight);
+		// edges.put(new Edge(second, first), weight);
 		edges.put(edge, weight);
 
 		// add nodes to the tree
@@ -157,9 +157,14 @@ public class TransmissionTree {
 		return edges;
 	}
 
-	public void setValues(HashMap<Node, Integer> observation) {
-		for (Entry<Node, Integer> observationEntry : observation.entrySet()) {
-			observationEntry.getKey().setValue(observationEntry.getValue());
+	public void setValues(HashMap<Node, Double> observation) {
+		for (Node node : treeNodes.values()) {
+			Double value = observation.get(node);
+			if (value != null) {
+				int v = (int) Math.round(value);
+				node.setValue(v);
+			} else
+				node.setValue(-1);
 		}
 	}
 

@@ -28,7 +28,7 @@ public class Node {
 	/**
 	 * binary value indicator
 	 */
-	private int value;
+	private double value;
 
 	private Psi psi;
 
@@ -39,10 +39,10 @@ public class Node {
 	/**
 	 * Constructor with only the serial value of the node
 	 * 
-	 * @param value
+	 * @param key
 	 */
-	public Node(TransmissionTree tree, int value) {
-		this.key = value;
+	public Node(TransmissionTree tree, int key) {
+		this.key = key;
 		this.neighbors = new HashSet<Node>();
 		this.value = -1;
 		this.tree = tree;
@@ -121,11 +121,11 @@ public class Node {
 		this.marginalDisribution = marginalDisribution;
 	}
 
-	public int getValue() {
+	public double getValue() {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(double value) {
 		this.value = value;
 	}
 
