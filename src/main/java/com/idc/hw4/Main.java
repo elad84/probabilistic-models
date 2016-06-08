@@ -26,7 +26,8 @@ public class Main {
 			break;
 		case "M":
 			if(args.length < 11){
-				throw new IllegalArgumentException("must supply with initial settings for model parameters");
+				throw new IllegalArgumentException(
+						"must supply with initial settings for model parameters");
 			}
 			
 			String dataFilePath = args[1];
@@ -47,52 +48,63 @@ public class Main {
 			List<HashMap<Node, Integer>> observations = readObservations(tree,
 					dataFilePath);
 
+			tree.setEdgeWeight(p12, tree.getNode(1), tree.getNode(2));
+			tree.setEdgeWeight(p23, tree.getNode(2), tree.getNode(3));
+			tree.setEdgeWeight(p24, tree.getNode(2), tree.getNode(4));
+			tree.setEdgeWeight(p15, tree.getNode(1), tree.getNode(5));
+			tree.setEdgeWeight(p56, tree.getNode(5), tree.getNode(6));
+			tree.setEdgeWeight(p57, tree.getNode(5), tree.getNode(7));
+			tree.setEdgeWeight(p18, tree.getNode(1), tree.getNode(8));
+			tree.setEdgeWeight(p89, tree.getNode(8), tree.getNode(9));
+			tree.setEdgeWeight(p810, tree.getNode(8), tree.getNode(10));
+
 			Set<Edge> edges = tree.getEdges().keySet();
-			int edgeInt;
-			//set probability for all edges
-			for (Edge edge : edges) {
-				edgeInt = 10 * edge.getFirstNode().getKey() + edge.getSecondNode().getKey();
-				switch(edgeInt){
-					case 12:
-					case 21:
-						tree.setEdgeWeight(p12, edge);
-						break;
-					case 15:
-					case 51:
-						tree.setEdgeWeight(p15, edge);
-						break;
-					case 23:
-					case 32:
-						tree.setEdgeWeight(p23, edge);
-						break;
-					case 24:
-					case 42:
-						tree.setEdgeWeight(p24, edge);
-						break;
-					case 56:
-					case 65:
-						tree.setEdgeWeight(p56, edge);
-						break;
-					case 57:
-					case 75:
-						tree.setEdgeWeight(p57, edge);
-						break;
-					case 18:
-					case 81:
-						tree.setEdgeWeight(p18, edge);
-						break;
-					case 89:
-					case 98:
-						tree.setEdgeWeight(p89, edge);
-						break;
-					case 108:
-					case 90:
-						tree.setEdgeWeight(p810, edge);
-						break;
-					default:
-						throw new IllegalArgumentException("no such edge found");
-				}
-			}
+			// int edgeInt;
+			// //set probability for all edges
+			// for (Edge edge : edges) {
+			// edgeInt = 10 * edge.getFirstNode().getKey() +
+			// edge.getSecondNode().getKey();
+			// switch(edgeInt){
+			// case 12:
+			// case 21:
+			// tree.setEdgeWeight(p12, edge);
+			// break;
+			// case 15:
+			// case 51:
+			// tree.setEdgeWeight(p15, edge);
+			// break;
+			// case 23:
+			// case 32:
+			// tree.setEdgeWeight(p23, edge);
+			// break;
+			// case 24:
+			// case 42:
+			// tree.setEdgeWeight(p24, edge);
+			// break;
+			// case 56:
+			// case 65:
+			// tree.setEdgeWeight(p56, edge);
+			// break;
+			// case 57:
+			// case 75:
+			// tree.setEdgeWeight(p57, edge);
+			// break;
+			// case 18:
+			// case 81:
+			// tree.setEdgeWeight(p18, edge);
+			// break;
+			// case 89:
+			// case 98:
+			// tree.setEdgeWeight(p89, edge);
+			// break;
+			// case 108:
+			// case 90:
+			// tree.setEdgeWeight(p810, edge);
+			// break;
+			// default:
+			// throw new IllegalArgumentException("no such edge found");
+			// }
+			// }
 			
 			double dataLikelihood = calcLogLikelihood(tree, observations);
 			double lastProb = 0;
@@ -105,12 +117,18 @@ public class Main {
 				}
 				for(HashMap<Node, Integer> observation  : observations){
 					tree.setValues(observation);
-					MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(tree);
+				MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
+						tree);
 					marginalDisributionCalculator.computeMarginals(tree.getRoot());
-					Map<Integer, MarginalDisribution> map = tree.getNodesMarginalDisribution();
+				Map<Integer, MarginalDisribution> map = tree
+						.getNodesMarginalDisribution();
 					for(Integer key : map.keySet()){
-						observation.put(tree.getNode(key), map.get(key).getValue(true) > map.get(key).getValue(false) ? 1 : 
-							map.get(key).getValue(true) == map.get(key).getValue(false) ? 1 : 0);
+					observation.put(
+							tree.getNode(key),
+							map.get(key).getValue(true) > map.get(key)
+									.getValue(false) ? 1 : map.get(key)
+									.getValue(true) == map.get(key).getValue(
+									false) ? 1 : 0);
 					}
 				}
 				
