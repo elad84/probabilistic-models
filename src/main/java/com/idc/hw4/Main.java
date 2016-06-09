@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.idc.message.MarginalDisributionCalculator;
+import com.idc.message.MaxMarginalDisributionCalculator;
 import com.idc.message.TransmissionTreeFactory;
 import com.idc.model.Edge;
 import com.idc.model.MarginalDisribution;
@@ -36,16 +37,18 @@ public class Main {
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 
-//		args[2] = "0.098";
-//		args[3] = "0.590";
-//		args[4] = "0.000";
-//		args[5] = "0.066";
-//		args[6] = "0.081";
-//		args[7] = "0.197";
-//		args[8] = "0.041";
-//		args[9] = "0.288";
-//		args[10] = "0.036";
-		
+		String[] probsStr = "0.034	0.503	0.087	0.030	0.116	0.162	0.043	0.253	0.071"
+				.split(" |\t");
+		// args[2] = probsStr[0];
+		// args[3] = probsStr[1];
+		// args[4] = probsStr[2];
+		// args[5] = probsStr[3];
+		// args[6] = probsStr[4];
+		// args[7] = probsStr[5];
+		// args[8] = probsStr[6];
+		// args[9] = probsStr[7];
+		// args[10] = probsStr[8];
+
 		switch (args[0]) {
 		case "C":
 			inferenceFromCompleteData(args[1]);
@@ -126,21 +129,26 @@ public class Main {
 				Map<Integer, MarginalDisribution> marginalDisributionsMap = tree
 						.getNodesMarginalDisribution();
 				double likelihood = 0;
+
 				// inference hidden RVs
+				HashMap<Node, Double> inferedObservation = inferedObservations
+						.get(i);
 				for (Integer key : marginalDisributionsMap.keySet()) {
-					HashMap<Node, Double> inferedObservation = inferedObservations
-							.get(i);
 					MarginalDisribution marginalDisribution = marginalDisributionsMap
 							.get(key);
 					if (args[0].equals("M")) {
 						double prob0 = marginalDisribution.getValue(false);
 						double prob1 = marginalDisribution.getValue(true);
-						if (key == 1) {
-							inferedObservation.put(tree.getNode(key),
-									prob1 >= prob0 ? 1.0 : 0.0);
-						} else
-							inferedObservation.put(tree.getNode(key),
-									prob1 > prob0 ? 1.0 : 0.0);
+						if (prob0 == prob1) {
+							System.out.println();
+						}
+						// if (key == 1) {
+						inferedObservation.put(tree.getNode(key),
+								prob1 >= prob0 ? 1.0 : 0.0);
+						// } else
+
+						// inferedObservation.put(tree.getNode(key),
+						// prob1 > prob0 ? 1.0 : 0.0);
 					} else { // args[0].equals("E")
 						// the expectation of an indicator is the probability it
 						// equals 1
@@ -149,6 +157,13 @@ public class Main {
 						inferedObservation.put(tree.getNode(key), dist[1]);
 					}
 				}
+
+				// check that the inferred observations agrees with the actual
+				// observations
+				// for (Entry<Node, Double> e : observation.entrySet()) {
+				// assert (e.getValue().equals(inferedObservation.get(e
+				// .getKey())));
+				// }
 
 				MarginalDisribution marginalDisribution = marginalDisributionsMap
 						.get(1);
@@ -159,20 +174,20 @@ public class Main {
 
 			// calculate the log probability of the complete data
 			double dataProbability = calcLogLikelihood(tree,
-					inferedObservations);
+					inferedObservations, args[1]);
 
-			// print results
+			// print iteration results
 			for (Edge edge : edgesOrdered) {
 				System.out.printf("%.3f\t", tree.getEdgeWeight(edge));
 			}
-			System.out.print("\t" + dataProbability);
-			System.out.println("\t" + dataLikelihood);
-			// if (args[0].equals("M"))
-			if (dataProbability - prevProbability < 0.001)
+			System.out.printf("\t%.4f", dataProbability);
+			System.out.printf("\t\t%.4f\n", dataLikelihood);
+
+			if (args[0].equals("M")) {
+				if (dataProbability - prevProbability < 0.001)
+					break;
+			} else if (dataLikelihood - prevLikelihood < 0.001)
 				break;
-			// else
-			// if (dataProbability - prevProbability < 0.001)
-			// break;
 
 			// save likelihood
 			prevLikelihood = dataLikelihood;
@@ -219,7 +234,7 @@ public class Main {
 		for (Edge edge : edgesOrdered) {
 			System.out.printf("%.3f\t", tree.getEdgeWeight(edge));
 		}
-		System.out.println("\t" + calcLogLikelihood(tree, observations));
+		System.out.println("\t" + calcLogLikelihood(tree, observations, "C"));
 
 	}
 
@@ -242,7 +257,15 @@ public class Main {
 					break;
 
 				case "E":
-					countFlips += Math.abs(firstValue - socondValue);
+					double flipProb = firstValue * (1 - socondValue)
+							+ (1 - firstValue) * socondValue;
+//					double noFlipProb = firstValue * socondValue + (1 - firstValue)
+//							* (1 - socondValue);
+
+					countFlips += flipProb;
+
+//					System.out.println("flip " + flipProb);
+//					System.out.println("no flip " + noFlipProb);
 					break;
 				default:
 					break;
@@ -258,10 +281,11 @@ public class Main {
 	 * 
 	 * @param tree
 	 * @param observations
+	 * @param option
 	 * @return
 	 */
 	private static double calcLogLikelihood(TransmissionTree tree,
-			List<HashMap<Node, Double>> observations) {
+			List<HashMap<Node, Double>> observations, String option) {
 		double logLikelihood = 0;
 		for (HashMap<Node, Double> observation : observations) {
 			tree.setValues(observation);
