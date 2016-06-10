@@ -15,6 +15,16 @@ public class ObservationsData {
     private List<List<Integer>> data;
     private Map<Integer, List<Integer>> variable2Data;
 
+    private double likelihood;
+
+    public double getLikelihood() {
+        return likelihood;
+    }
+
+    public void setLikelihood(double likelihood) {
+        this.likelihood = likelihood;
+    }
+
     public List<String> getVariables() {
         return variables;
     }

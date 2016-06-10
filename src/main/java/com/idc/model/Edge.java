@@ -6,13 +6,21 @@ package com.idc.model;
  *
  */
 public class Edge {
-	
+
 	private Node firstNode;
 	private Node secondNode;
 	
 	public Edge(Node first, Node another){
 		this.firstNode = first;
 		this.secondNode = another;
+	}
+
+	public Node getFirstNode() {
+		return firstNode;
+	}
+
+	public Node getSecondNode() {
+		return secondNode;
 	}
 
 	@Override

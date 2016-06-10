@@ -118,8 +118,8 @@ public class TransmissionTree {
 		return edges.get(edge);
 	}
 	
-	public Node getNode(int value){
-		return treeNodes.get(value);
+	public Node getNode(int key){
+		return treeNodes.get(key);
 	}
 
 	/**

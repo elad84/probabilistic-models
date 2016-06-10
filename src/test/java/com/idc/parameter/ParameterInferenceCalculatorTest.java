@@ -12,26 +12,26 @@ import org.junit.Test;
 public class ParameterInferenceCalculatorTest {
 
     @Test
-    public void calculateMLETest0(){
-        computeMLE("input/sample-data-1.txt");
+    public void compute0(){
+        compute("input/sample-data-1.txt");
     }
 
     @Test
-    public void calculateMLETest1(){
-        computeMLE("input/tree-data-1a.txt");
+    public void compute1(){
+        compute("input/tree-data-1a.txt");
     }
 
     @Test
-    public void calculateMLETest2(){
-        computeMLE("input/tree-data-1b.txt");
+    public void compute2(){
+        compute("input/tree-data-1b.txt");
     }
 
     @Test
-    public void calculateMLETest3(){
-        computeMLE("input/tree-data-1c.txt");
+    public void compute3(){
+        compute("input/tree-data-1c.txt");
     }
 
-    private void computeMLE(String inputFile) {
+    private void compute(String inputFile) {
         TransmissionTree tree = TransmissionTreeFactory.buildTreeNullWeight();
         Node node = tree.getNode(1);
         node.setRoot(true);
@@ -40,7 +40,7 @@ public class ParameterInferenceCalculatorTest {
         ObservationsData observationsData = observationDataInputFileProvider.readObservationsDataFile(inputFile);
 
         ParameterInferenceCalculator parameterInferenceCalculator = new ParameterInferenceCalculator(observationsData);
-        parameterInferenceCalculator.computeMLE(node);
+        parameterInferenceCalculator.compute(node);
 
         System.out.println(parameterInferenceCalculator);
     }

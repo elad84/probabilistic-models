@@ -53,6 +53,14 @@ public class MaxMarginalDisributionCalculator {
 		return starValues;
 	}
 
+	public Map<Edge, BinaryMessage> getMessages() {
+		return messages;
+	}
+
+	public Map<Edge, ArgMax> getMaxValues() {
+		return maxValues;
+	}
+
 	/**
 	 * Computes marginal for all nodes in {@link #tree}
 	 *

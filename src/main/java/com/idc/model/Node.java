@@ -151,7 +151,6 @@ public class Node implements Comparable{
 				double p = tree.getEdgeWeight(new Edge(this, neighbor));
 				likelihood *= (value == neighbor.getValue() ? (1 - p) : p);
 				likelihood *= neighbor.likelihood(tree);
-
 			}
 		}
 		return likelihood;

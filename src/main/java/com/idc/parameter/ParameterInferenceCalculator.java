@@ -3,9 +3,10 @@ package com.idc.parameter;
 import com.idc.model.Node;
 import com.idc.model.ObservationsData;
 import com.idc.model.SufficientStatistics;
-import com.idc.model.TransmissionTree;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by annishaa on 5/28/16.
@@ -13,22 +14,20 @@ import java.util.List;
 public class ParameterInferenceCalculator {
     private ObservationsData observationsData;
     private SufficientStatistics sufficientStatistics;
+    private double loglikelihood;
 
     public ParameterInferenceCalculator( ObservationsData observationsData) {
         this.observationsData = observationsData;
         this.sufficientStatistics = new SufficientStatistics();
     }
 
-    public SufficientStatistics computeMLE(Node root){
+    public SufficientStatistics compute(Node root){
         computeSufficientStatistics(root,null);
         sufficientStatistics.computeMLE();
         sufficientStatistics.computeFlipProbabilities();
-
-        sufficientStatistics.computeLoglikelihood(observationsData,root);
-
+        loglikelihood = LikelihoodCalculator.calculateLogLikelihood(observationsData, root, sufficientStatistics);
 
         return sufficientStatistics;
-
     }
 
     private void computeSufficientStatistics(Node root, Node caller){
@@ -63,6 +62,21 @@ public class ParameterInferenceCalculator {
 
     @Override
     public String toString() {
-        return sufficientStatistics.toString();
+        StringBuilder sbTitle = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
+        sufficientStatistics.getNodeKey2FlipProbability().entrySet().stream().sorted(new Comparator<Map.Entry<SufficientStatistics.KeyPair, Double>>() {
+            @Override
+            public int compare(Map.Entry<SufficientStatistics.KeyPair, Double> o1, Map.Entry<SufficientStatistics.KeyPair, Double> o2) {
+                return o1.getKey().key.compareTo(o2.getKey().key);
+            }
+        }).forEach(e ->{
+            sb.append(String.format("%.3f\t ", e.getValue()));
+            sbTitle.append(String.format("p%d-%d\t ",e.getKey().parentKey, e.getKey().key));
+        });
+
+        sbTitle.append("log-ld\n");
+        sb.append(String.format("%.4f\t ", loglikelihood));
+        sbTitle.append(sb);
+        return sbTitle.toString();
     }
 }

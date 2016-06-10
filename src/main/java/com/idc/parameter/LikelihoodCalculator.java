@@ -1,10 +1,11 @@
 package com.idc.parameter;
 
+import com.idc.message.TransmissionTreeFactory;
 import com.idc.model.Node;
 import com.idc.model.ObservationsData;
+import com.idc.model.SufficientStatistics;
 import com.idc.model.TransmissionTree;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,8 +13,8 @@ import java.util.List;
  */
 public class LikelihoodCalculator {
 
-    public static double calcLogLikelihood(TransmissionTree tree, Node root,
-                                            ObservationsData observationsData) {
+    public static double calculateLogLikelihood(TransmissionTree tree, Node root,
+                                                ObservationsData observationsData) {
         double logLikelihood = 0;
         for (List<Integer> observation : observationsData.getData()) {
 
@@ -30,6 +31,21 @@ public class LikelihoodCalculator {
 
     private static double getLogLikelihood(TransmissionTree tree, Node root) {
         return Math.log(0.5 * root.likelihood(tree));
+    }
+
+    public static double calculateLogLikelihood(ObservationsData observationsData, Node root, SufficientStatistics sufficientStatistics){
+
+        Double[] weights = new Double[] {sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(1, 2)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(2,3)),
+                sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(2,4)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(1,5)),
+                sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(5,6)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(5,7)),
+                sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(1,8)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(8,9)),
+                sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(8,10))};
+
+        TransmissionTree transmissionTree = TransmissionTreeFactory.buildTree(weights);
+        Node treeRoot = transmissionTree.getNode(root.getKey());
+        treeRoot.setRoot(true);
+        treeRoot.setParent(null);
+        return LikelihoodCalculator.calculateLogLikelihood(transmissionTree, treeRoot, observationsData);
     }
 
 }

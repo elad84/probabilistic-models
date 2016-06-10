@@ -19,14 +19,8 @@ public class SufficientStatistics {
 
     private  Map<KeyPair,Double> nodeKey2FlipProbability = new HashMap<>();
 
-    private Double loglikelihood;
-
     public Map<KeyPair, Double> getNodeKey2FlipProbability() {
         return nodeKey2FlipProbability;
-    }
-
-    public Double getLoglikelihood() {
-        return loglikelihood;
     }
 
     public void setNodeKey2Count(int key, long nObservationsZero, long nObservationsOne) {
@@ -46,13 +40,17 @@ public class SufficientStatistics {
                         e -> {
                             Long[][] nCounts = e.getValue();
                             long rowParentZero = nCounts[0][0] + nCounts[0][1];
+                            double pParentZero = rowParentZero == 0 ? 0 : nCounts[0][0] / (double) rowParentZero;
+                            double pParentZero1 = rowParentZero == 0 ? 0 :nCounts[0][1] / (double) (rowParentZero);
                             if (e.getKey().parentKey == null){
-                                return new Double[][]{{(nCounts[0][0] / (double) rowParentZero), (nCounts[0][1] / (double) (rowParentZero))}};
+                                return new Double[][]{{pParentZero, pParentZero1}};
                             }
 
                             long rowParentOne = nCounts[1][0] + nCounts[1][1];
-                            return new Double[][]{{(nCounts[0][0] / (double) rowParentZero), (nCounts[0][1] / (double) (rowParentZero))},
-                                    {(nCounts[1][0] / (double) rowParentOne), (nCounts[1][1] / (double) (rowParentOne))}};
+                            double pParentOne = rowParentOne == 0 ? 0 : nCounts[1][0] / (double) rowParentOne;
+                            double pParentOne1 = rowParentOne == 0 ? 0 : nCounts[1][1] / (double) (rowParentOne);
+                            return new Double[][]{{pParentZero, pParentZero1},
+                                    {pParentOne, pParentOne1}};
                         }));
     }
 
@@ -64,42 +62,11 @@ public class SufficientStatistics {
         ));
     }
 
-    public void computeLoglikelihood(ObservationsData observationsData, Node root){
-
-        Double[] weights = new Double[] {getFlipProbability(new KeyPair(1, 2)), getFlipProbability(new KeyPair(2,3)),
-                getFlipProbability(new KeyPair(2,4)), getFlipProbability(new KeyPair(1,5)),
-                getFlipProbability(new KeyPair(5,6)), getFlipProbability(new KeyPair(5,7)),
-                getFlipProbability(new KeyPair(1,8)), getFlipProbability(new KeyPair(8,9)),
-                getFlipProbability(new KeyPair(8,10))};
-
-        TransmissionTree transmissionTree = TransmissionTreeFactory.buildTree(weights);
-        Node treeRoot = transmissionTree.getNode(root.getKey());
-        treeRoot.setRoot(true);
-        treeRoot.setParent(null);
-        double loglikelihood = LikelihoodCalculator.calcLogLikelihood(transmissionTree, treeRoot, observationsData);
-        this.loglikelihood = loglikelihood;
-    }
-
-    private Double getFlipProbability(KeyPair keyPair) {
+    public Double getFlipProbability(KeyPair keyPair) {
         Double flipProb = nodeKey2FlipProbability.get(keyPair);
         if (flipProb == null)
             flipProb = nodeKey2FlipProbability.get(new KeyPair(keyPair.parentKey,keyPair.key));
         return flipProb;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sbTitle = new StringBuilder();
-        StringBuilder sb = new StringBuilder();
-        nodeKey2FlipProbability.entrySet().stream().forEach(e ->{
-            sb.append(String.format("%.3f\t ", e.getValue()));
-            sbTitle.append(String.format("p%d-%d\t ",e.getKey().key, e.getKey().parentKey));
-        });
-
-        sbTitle.append("log-ld\n");
-        sb.append(String.format("%.4f\t ", loglikelihood));
-        sbTitle.append(sb);
-        return sbTitle.toString();
     }
 
     public static class KeyPair{
