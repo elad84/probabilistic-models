@@ -131,20 +131,44 @@ public class Node {
 
 	/**
 	 * Calculates likelihood for {@link Node} is recursive
+	 * 
 	 * @return
 	 */
-	public double likelihood() {
-		double likelihood = 1;
-		//iterate over neighbors and get likelihood
+	public double probability() {
+		double probability = 1;
+		// iterate over neighbors and get probability
 		for (Node neighbor : this.getNeighbors()) {
 			if (neighbor != this.parent) {
 				double p = tree.getEdgeWeight(new Edge(this, neighbor));
-				likelihood *= (value == neighbor.getValue() ? (1 - p) : p);
-				likelihood *= neighbor.likelihood();
+				double flipProb = value * (1 - neighbor.getValue())
+						+ (1 - value) * neighbor.getValue();
+				probability *= flipProb * p + (1 - flipProb) * (1 - p);
+				probability *= neighbor.probability();
 
 			}
 		}
-		return likelihood;
+		return probability;
 	}
+
+	// public double likelihood() {
+	// if (isLeaf()) {
+	// return 1;
+	// }
+	//
+	// double likelihood = 1;
+	// // iterate over neighbors and get likelihood
+	// for (Node neighbor : this.getNeighbors()) {
+	// if (neighbor != this.parent) {
+	// double p = tree.getEdgeWeight(new Edge(this, neighbor));
+	//
+	// double neighborValue = neighbor.getValue();
+	//
+	// likelihood *= (neighborValue==0) ? p : (1-p);
+	// likelihood *= neighbor.likelihood();
+	//
+	// }
+	// }
+	// return likelihood;
+	// }
 
 }

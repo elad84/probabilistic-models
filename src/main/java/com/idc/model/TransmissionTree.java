@@ -161,19 +161,22 @@ public class TransmissionTree {
 		for (Node node : treeNodes.values()) {
 			Double value = observation.get(node);
 			if (value != null) {
-				int v = (int) Math.round(value);
-				node.setValue(v);
+				node.setValue(value);
 			} else
 				node.setValue(-1);
 		}
 	}
 
-	public double logLikelihood() {
-		return Math.log(0.5 * root.likelihood());
+	public double logProbability() {
+		return Math.log(0.5 * root.probability());
 	}
 
 	public Node getRoot() {
 		return root;
 	}
+
+	// public double logLikelihood() {
+	// return Math.log(root.likelihood());
+	// }
 
 }

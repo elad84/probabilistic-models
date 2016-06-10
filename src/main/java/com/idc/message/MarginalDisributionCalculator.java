@@ -45,14 +45,16 @@ public class MarginalDisributionCalculator {
 	 * @param root
 	 * @throws IllegalAccessException
 	 */
-	public void computeMarginals(Node root) throws IllegalAccessException {
-		collect(root, null);
+	public double computeMarginals(Node root) {
+		BinaryMessage rootProb = collect(root, null);
 		distribute(root, null);
 
 		// System.out
 		// .println("P(XA): "
 		// + (root.getPsi().getValue(false) + root.getPsi()
 		// .getValue(true)));
+
+		return rootProb.getValue(false)+rootProb.getValue(true);
 	}
 
 	/**
@@ -64,8 +66,7 @@ public class MarginalDisributionCalculator {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public BinaryMessage collect(Node node, Node caller)
-			throws IllegalAccessException {
+	public BinaryMessage collect(Node node, Node caller) {
 		// System.out.println("passing message from node: " + node);
 		if (logger.isDebugEnabled()) {
 			logger.debug("running collect for node: " + node);
