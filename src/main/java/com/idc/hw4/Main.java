@@ -372,14 +372,7 @@ public class Main {
 		for (HashMap<Node, Double> observation : observations) {
 			tree.setValues(observation);
 			// for every observation calculate probability
-//			logProbability += tree.logProbability();
-			
-
-			MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
-					tree);
-			double likelihood = marginalDisributionCalculator
-					.computeMarginals(tree.getRoot());
-			logProbability += Math.log(likelihood);
+			logProbability += tree.logProbability();
 		}
 		return logProbability;
 	}
