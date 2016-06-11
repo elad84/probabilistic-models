@@ -34,9 +34,7 @@ public class Main {
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 
-		// String[] probsStr =
-		// "0.034	0.503	0.087	0.030	0.116	0.162	0.043	0.253	0.071"
-		// .split(" |\t");
+		// String[] probsStr = "0.1 0.2 .3 .4 .5 .6 .7 .8 .9".split(" |\t");
 		// args[2] = probsStr[0];
 		// args[3] = probsStr[1];
 		// args[4] = probsStr[2];
@@ -110,7 +108,7 @@ public class Main {
 	public static void maxProbabilityInferance(
 			List<HashMap<Node, Double>> observations) {
 
-		double prevProbability = -999999999;
+		double prevProbability = Double.NEGATIVE_INFINITY;
 
 		// print header
 		for (Edge edge : edgesOrdered) {
@@ -132,7 +130,7 @@ public class Main {
 				// initialize the tree with the current observation
 				tree.setValues(observation);
 
-				// compute marginal probabilities for all the nodes
+				// compute assignment that maximizes joint probability
 				MaxMarginalDisributionCalculator marginalDisributionCalculator = new MaxMarginalDisributionCalculator(
 						tree);
 				double probability = marginalDisributionCalculator
@@ -144,13 +142,16 @@ public class Main {
 				// inference hidden RVs
 				HashMap<Node, Double> inferedObservation = inferedObservations
 						.get(i);
-				for (Entry<Node, Boolean> e : marginalDisributionsMap
+				for (Entry<Node, Boolean> marginalDist : marginalDisributionsMap
 						.entrySet()) {
-					if (e.getValue())
-						inferedObservation.put(e.getKey(), 1.0);
+					if (marginalDist.getValue())
+						inferedObservation.put(marginalDist.getKey(), 1.0);
 					else
-						inferedObservation.put(e.getKey(), 0.0);
+						inferedObservation.put(marginalDist.getKey(), 0.0);
+					
+//					System.out.print(inferedObservation.get(marginalDist.getKey()) + "\t");
 				}
+//				System.out.println();
 
 				// check that the inferred observations agrees with the actual
 				// observations
@@ -198,7 +199,7 @@ public class Main {
 	public static void expectationMaximizationInferance(
 			List<HashMap<Node, Double>> observations) {
 
-		double prevLikelihood = -999999999;
+		double prevLikelihood = Double.NEGATIVE_INFINITY;
 
 		// print header
 		for (Edge edge : edgesOrdered) {
@@ -242,8 +243,9 @@ public class Main {
 					double[] dist = marginalDisribution
 							.getNormalizedMarginalDisribution();
 					inferedObservation.put(tree.getNode(key), dist[1]);
-
+//					 System.out.print(dist[1]+"\t");
 				}
+//				 System.out.println();
 
 				// check that the inferred observations agrees with the actual
 				// observations
