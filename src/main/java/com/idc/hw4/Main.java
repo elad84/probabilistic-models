@@ -19,9 +19,7 @@ public class Main {
 
 	private static ArrayList<Edge> edgesOrdered;
 	private static TransmissionTree tree;
-
-	public static void main(String[] args) throws IllegalAccessException {
-
+	static {
 		tree = TransmissionTreeFactory.buildHW3Tree();
 		edgesOrdered = new ArrayList<Edge>();
 		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(2)));
@@ -33,6 +31,9 @@ public class Main {
 		edgesOrdered.add(new Edge(tree.getNode(1), tree.getNode(8)));
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(9)));
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
+	}
+
+	public static void main(String[] args) throws IllegalAccessException {
 
 		// String[] probsStr = "0.1 0.2 .3 .4 .5 .6 .7 .8 .9".split(" |\t");
 		// args[2] = probsStr[0];
@@ -148,10 +149,11 @@ public class Main {
 						inferedObservation.put(marginalDist.getKey(), 1.0);
 					else
 						inferedObservation.put(marginalDist.getKey(), 0.0);
-					
-//					System.out.print(inferedObservation.get(marginalDist.getKey()) + "\t");
+
+					// System.out.print(inferedObservation.get(marginalDist.getKey())
+					// + "\t");
 				}
-//				System.out.println();
+				// System.out.println();
 
 				// check that the inferred observations agrees with the actual
 				// observations
@@ -243,9 +245,9 @@ public class Main {
 					double[] dist = marginalDisribution
 							.getNormalizedMarginalDisribution();
 					inferedObservation.put(tree.getNode(key), dist[1]);
-//					 System.out.print(dist[1]+"\t");
+					// System.out.print(dist[1]+"\t");
 				}
-//				 System.out.println();
+				// System.out.println();
 
 				// check that the inferred observations agrees with the actual
 				// observations
@@ -312,8 +314,8 @@ public class Main {
 		for (Edge edge : edgesOrdered) {
 			System.out.printf("%.3f\t", tree.getEdgeWeight(edge));
 		}
-		System.out.println("\t" + calcLogProbability(tree, observations, "C"));
-
+		System.out.printf("\t%.4f\n",
+				calcLogProbability(tree, observations, "C"));
 	}
 
 	public static void inferFromCompleteData(TransmissionTree tree,
@@ -370,7 +372,14 @@ public class Main {
 		for (HashMap<Node, Double> observation : observations) {
 			tree.setValues(observation);
 			// for every observation calculate probability
-			logProbability += tree.logProbability();
+//			logProbability += tree.logProbability();
+			
+
+			MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(
+					tree);
+			double likelihood = marginalDisributionCalculator
+					.computeMarginals(tree.getRoot());
+			logProbability += Math.log(likelihood);
 		}
 		return logProbability;
 	}
