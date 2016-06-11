@@ -15,6 +15,12 @@ import com.idc.model.MarginalDisribution;
 import com.idc.model.Node;
 import com.idc.model.TransmissionTree;
 
+/**
+ * Inference data from complete or partial data
+ * 
+ * @author eladcohen
+ *
+ */
 public class Main {
 
 	private static ArrayList<Edge> edgesOrdered;
@@ -33,6 +39,47 @@ public class Main {
 		edgesOrdered.add(new Edge(tree.getNode(8), tree.getNode(10)));
 	}
 
+	/**
+	 * Inferring tree edges based on given method. Supports three methods:
+	 * <ul>
+	 * <li>
+	 * 		C - indicates inference is done on complete data. Expected arguments:
+	 * 		<ul>
+	 * 			<li>Path to a file with data for all RVs</li>
+	 * 		</ul>
+	 * </li>
+	 * <li>
+	 * 		M - indicates inference is done based on partial data with Maximum probability method. Expected arguments:
+	 *  	<ul>
+	 * 			<li>Path to a file with partial data for some of the RVs</li>
+	 * 			<li>initial probability of flip for edge 1-2</li>
+	 * 			<li>initial probability of flip for edge 2-3</li>
+	 * 			<li>initial probability of flip for edge 1-5</li>
+	 * 			<li>initial probability of flip for edge 5-6</li>
+	 * 			<li>initial probability of flip for edge 5-7</li>
+	 * 			<li>initial probability of flip for edge 1-8</li>
+	 * 			<li>initial probability of flip for edge 8-9</li>
+	 * 			<li>initial probability of flip for edge 8-10</li>
+	 * 		</ul>
+	 * </li>
+	 * <li>
+	 * 		E - indicates inference is done based on partial data with Expected Maximization method. Expected arguments:
+	 *  	<ul>
+	 * 			<li>Path to a file with partial data for some of the RVs</li>
+	 * 			<li>initial probability of flip for edge 1-2</li>
+	 * 			<li>initial probability of flip for edge 2-3</li>
+	 * 			<li>initial probability of flip for edge 1-5</li>
+	 * 			<li>initial probability of flip for edge 5-6</li>
+	 * 			<li>initial probability of flip for edge 5-7</li>
+	 * 			<li>initial probability of flip for edge 1-8</li>
+	 * 			<li>initial probability of flip for edge 8-9</li>
+	 * 			<li>initial probability of flip for edge 8-10</li>
+	 * 		</ul>
+	 * </li>
+	 * </ul>
+	 * @param args
+	 * @throws IllegalAccessException
+	 */
 	public static void main(String[] args) throws IllegalAccessException {
 
 		// String[] probsStr = "0.1 0.2 .3 .4 .5 .6 .7 .8 .9".split(" |\t");
@@ -60,6 +107,13 @@ public class Main {
 
 	}
 
+	/**
+	 * Inferring the edges values based on sample data with partial RVs assignment
+	 * and an initial edges values assignment
+	 * 
+	 * @param args
+	 * @throws IllegalAccessException
+	 */
 	public static void inferenceFromPartialData(String[] args)
 			throws IllegalAccessException {
 		if (args.length < 11) {
@@ -106,8 +160,12 @@ public class Main {
 		}
 	}
 
-	public static void maxProbabilityInferance(
-			List<HashMap<Node, Double>> observations) {
+	/**
+	 * Inferring tree edges by the max probability method for partial data
+	 * 
+	 * @param observations list of partial observations
+	 */
+	public static void maxProbabilityInferance(List<HashMap<Node, Double>> observations) {
 
 		double prevProbability = Double.NEGATIVE_INFINITY;
 
@@ -122,46 +180,21 @@ public class Main {
 		List<HashMap<Node, Double>> inferedObservations = ObservationsReader
 				.copyObservations(observations);
 
+		//Iterate over data until find local maximum. In each iteration do:
+		//1. Inference the hidden RVs
+		//2. calculate log probability of the observed RVs
+		//3. calculate log likelihood of the complete data
+		//4. update edges values based on complete data
 		do {
 			double dataProbability = 0;
 			// iterate over all observations
 			for (int i = 0; i < observations.size(); i++) {
 				HashMap<Node, Double> observation = observations.get(i);
+				//infer the hidden values
+				double probability = inferenceHiddenValues(observation,
+						inferedObservations, i);
 
-				// initialize the tree with the current observation
-				tree.setValues(observation);
-
-				// compute assignment that maximizes joint probability
-				MaxMarginalDisributionCalculator marginalDisributionCalculator = new MaxMarginalDisributionCalculator(
-						tree);
-				double probability = marginalDisributionCalculator
-						.computeMarginals(tree.getRoot());
-
-				Map<Node, Boolean> marginalDisributionsMap = marginalDisributionCalculator
-						.getStarValues();
-
-				// inference hidden RVs
-				HashMap<Node, Double> inferedObservation = inferedObservations
-						.get(i);
-				for (Entry<Node, Boolean> marginalDist : marginalDisributionsMap
-						.entrySet()) {
-					if (marginalDist.getValue())
-						inferedObservation.put(marginalDist.getKey(), 1.0);
-					else
-						inferedObservation.put(marginalDist.getKey(), 0.0);
-
-					// System.out.print(inferedObservation.get(marginalDist.getKey())
-					// + "\t");
-				}
-				// System.out.println();
-
-				// check that the inferred observations agrees with the actual
-				// observations
-				// for (Entry<Node, Double> e : observation.entrySet()) {
-				// assert (e.getValue().equals(inferedObservation.get(e
-				// .getKey())));
-				// }
-
+				//add current observation likelihood to log-prob
 				dataProbability += Math.log(probability);
 			}
 
@@ -185,6 +218,7 @@ public class Main {
 			System.out.printf("\t%.4f", dataProbability);
 			System.out.printf("\t\t%.4f\n", dataLikelihood);
 
+			//if data probability did not improve more than epsilon found local maximum 
 			if (dataProbability - prevProbability < 0.001)
 				break;
 
@@ -196,6 +230,43 @@ public class Main {
 			inferFromCompleteData(tree, inferedObservations);
 
 		} while (true);
+	}
+
+	/**
+	 * Inference hidden RVs for given observation
+	 * 
+	 * @param observation
+	 * @param inferedObservations
+	 * @param i
+	 * @return
+	 */
+	private static double inferenceHiddenValues(
+			HashMap<Node, Double> observation,
+			List<HashMap<Node, Double>> inferedObservations, int i) {
+
+		// initialize the tree with the current observation
+		tree.setValues(observation);
+
+		// compute assignment that maximizes joint probability
+		MaxMarginalDisributionCalculator marginalDisributionCalculator = new MaxMarginalDisributionCalculator(
+				tree);
+		double probability = marginalDisributionCalculator
+				.computeMarginals(tree.getRoot());
+
+		Map<Node, Boolean> marginalDisributionsMap = marginalDisributionCalculator
+				.getStarValues();
+
+		// inference hidden RVs
+		HashMap<Node, Double> inferedObservation = inferedObservations
+				.get(i);
+		for (Entry<Node, Boolean> marginalDist : marginalDisributionsMap
+				.entrySet()) {
+			if (marginalDist.getValue())
+				inferedObservation.put(marginalDist.getKey(), 1.0);
+			else
+				inferedObservation.put(marginalDist.getKey(), 0.0);
+		}
+		return probability;
 	}
 
 	public static void expectationMaximizationInferance(
@@ -337,6 +408,11 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Inference from expected data
+	 * @param tree
+	 * @param observations
+	 */
 	public static void inferFromExpectedData(TransmissionTree tree,
 			List<HashMap<Node, Double>> observations) {
 		Set<Edge> edges = tree.getEdges().keySet();
