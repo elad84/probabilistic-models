@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 public class ObservationsData {
 
     private List<String> variables;
-    private List<List<Integer>> data;
-    private Map<Integer, List<Integer>> variable2Data;
+    private List<List<Double>> data;
+    private Map<Integer, List<Double>> variable2Data;
 
     private double likelihood;
 
@@ -33,38 +33,38 @@ public class ObservationsData {
         this.variables = variables;
     }
 
-    public List<List<Integer>> getData() {
+    public List<List<Double>> getData() {
         return data;
     }
 
-    public void setData(List<List<Integer>> data) {
+    public void setData(List<List<Double>> data) {
         this.data = data;
     }
 
-    private Map<Integer, List<Integer>> getVariable2Data() {
+    private Map<Integer, List<Double>> getVariable2Data() {
         return variable2Data;
     }
 
-    public void setVariable2Data(Map<Integer, List<Integer>> variable2Data) {
+    public void setVariable2Data(Map<Integer, List<Double>> variable2Data) {
         this.variable2Data = variable2Data;
     }
 
-    public  List<Integer> getVariable2Data (Integer key){
+    public  List<Double> getVariable2Data (Integer key){
         return getVariable2Data().get(key - 1);
     }
 
-    public  List<Integer[]> getVariable2Data (Integer key, Integer parentKey){
-        List<Integer> variableData = getVariable2Data().get(key - 1);
-        List<Integer> variableParentData = getVariable2Data().get(parentKey - 1);
+    public  List<Double[]> getVariable2Data (Integer key, Integer parentKey){
+        List<Double> variableData = getVariable2Data().get(key - 1);
+        List<Double> variableParentData = getVariable2Data().get(parentKey - 1);
 
-        Stream<Integer[]> variableAndParentData = zip(variableData.stream(), variableParentData.stream());
+        Stream<Double[]> variableAndParentData = zip(variableData.stream(), variableParentData.stream());
         return variableAndParentData.collect(Collectors.toList());
     }
 
-    static Stream<Integer[]> zip(Stream<Integer> as, Stream<Integer> bs)
+    static Stream<Double[]> zip(Stream<Double> as, Stream<Double> bs)
     {
-        Iterator<Integer> i=as.iterator();
-        return bs.filter(x->i.hasNext()).map(b->new Integer[]{i.next(), b});
+        Iterator<Double> i=as.iterator();
+        return bs.filter(x->i.hasNext()).map(b->new Double[]{i.next(), b});
     }
 
     public void calcVariable2Data(){

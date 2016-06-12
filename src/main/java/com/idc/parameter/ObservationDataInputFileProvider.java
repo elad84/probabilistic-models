@@ -28,11 +28,11 @@ public class ObservationDataInputFileProvider {
             //X1 X2 X3 X4 X5 X6 X7 X8 X9 X10
             String sCurrentLine = br.readLine();
             List<String> variables = Arrays.asList(sCurrentLine.split("\\s+"));
-            List<List<Integer>> data = new ArrayList<>();
+            List<List<Double>> data = new ArrayList<>();
 
             while ((sCurrentLine = br.readLine()) != null) {
                 String[] observation = sCurrentLine.split("\\s+");
-                List<Integer> observationList = getObservation(observation);
+                List<Double> observationList = getObservation(observation);
                 data.add(observationList);
             }
 
@@ -53,10 +53,10 @@ public class ObservationDataInputFileProvider {
         return observationsData;
     }
 
-    private List<Integer> getObservation(String[] observation) {
-        List<Integer> observationList = new ArrayList<>();
+    private List<Double> getObservation(String[] observation) {
+        List<Double> observationList = new ArrayList<>();
         for (String o : observation) {
-            observationList.add(Integer.valueOf(o));
+            observationList.add(Double.valueOf(o));
         }
         return observationList;
     }

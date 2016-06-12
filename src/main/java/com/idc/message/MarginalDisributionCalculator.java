@@ -27,7 +27,12 @@ public class MarginalDisributionCalculator {
 			.getLogger(MarginalDisributionCalculator.class);
 
 	private TransmissionTree tree;
+
 	private Map<Edge, BinaryMessage> messages;
+
+	public Map<Edge, BinaryMessage> getMessages() {
+		return messages;
+	}
 
 	/**
 	 * Constructor getting tree to calculate distribution for
@@ -45,14 +50,16 @@ public class MarginalDisributionCalculator {
 	 * @param root
 	 * @throws IllegalAccessException
 	 */
-	public void computeMarginals(Node root) throws IllegalAccessException {
-		collect(root, null);
+	public BinaryMessage computeMarginals(Node root) throws IllegalAccessException {
+		BinaryMessage rootProb = collect(root, null);
 		distribute(root, null);
 
 		// System.out
 		// .println("P(XA): "
 		// + (root.getPsi().getValue(false) + root.getPsi()
 		// .getValue(true)));
+
+		return rootProb;
 	}
 
 	/**

@@ -1,12 +1,10 @@
 package com.idc.parameter;
 
 import com.idc.message.TransmissionTreeFactory;
-import com.idc.model.Node;
-import com.idc.model.ObservationsData;
-import com.idc.model.SufficientStatistics;
-import com.idc.model.TransmissionTree;
+import com.idc.model.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by annishaa on 6/4/16.
@@ -16,20 +14,21 @@ public class LikelihoodCalculator {
     public static double calculateLogLikelihood(TransmissionTree tree, Node root,
                                                 ObservationsData observationsData) {
         double logLikelihood = 0;
-        for (List<Integer> observation : observationsData.getData()) {
+        for (List<Double> observation : observationsData.getData()) {
 
             //set observation values to tree
             for (int i=0;i<observation.size();++i) {
                 Node node = tree.getNode(i+1);
-                node.setValue(observation.get(i));
+                node.setValue(observation.get(i).intValue());
             }
 
-            logLikelihood += getLogLikelihood(tree, root);
+            logLikelihood += calculateLogLikelihood(tree, root);
         }
         return logLikelihood;
     }
 
-    private static double getLogLikelihood(TransmissionTree tree, Node root) {
+
+    public static double calculateLogLikelihood(TransmissionTree tree, Node root) {
         return Math.log(0.5 * root.likelihood(tree));
     }
 
@@ -48,4 +47,21 @@ public class LikelihoodCalculator {
         return LikelihoodCalculator.calculateLogLikelihood(transmissionTree, treeRoot, observationsData);
     }
 
+    public static Double calculateLogLikelihood(TransmissionTree transmissionTreeRound, EMModel emModel) {
+
+        double logLikelihood = 0;
+        for (int i = 0; i < 1000; i++) {
+
+            double likelihood = 1.0;
+            for (Edge edge : emModel.getEdge2Ptable().keySet()) {
+                double p = transmissionTreeRound.getEdgeWeight(edge);
+
+                Double[][] pTable = emModel.getEdge2Ptable().get(edge).get(i);
+                likelihood *= (pTable[0][0] + pTable[1][1]) >=  (pTable[0][1] +  pTable[1][0]) ? (1-p) : p;
+            }
+
+            logLikelihood+=Math.log(0.5 * likelihood);
+        }
+        return logLikelihood;
+    }
 }

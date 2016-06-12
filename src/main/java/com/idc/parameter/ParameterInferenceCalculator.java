@@ -32,7 +32,7 @@ public class ParameterInferenceCalculator {
 
     private void computeSufficientStatistics(Node root, Node caller){
         int key = root.getKey();
-        List<Integer> variableData = observationsData.getVariable2Data(key);
+        List<Double> variableData = observationsData.getVariable2Data(key);
 
         if (root.isRoot()) {
             long nObservationsZero = variableData.stream().filter(observation -> observation == 0).count();
@@ -44,7 +44,7 @@ public class ParameterInferenceCalculator {
             Node parent = root.getParent();
             int parentKey = parent.getKey();
 
-            List<Integer[]> variableAndParentData = observationsData.getVariable2Data(key, parentKey);
+            List<Double[]> variableAndParentData = observationsData.getVariable2Data(key, parentKey);
             long nObservationsZeroParentZero = variableAndParentData.stream().filter(variableAndParent -> variableAndParent[1] == 0 && variableAndParent[0] == 0).count();
             long nObservationsOneParentZero = variableAndParentData.stream().filter(variableAndParent -> variableAndParent[1] == 0 && variableAndParent[0] == 1).count();
             long nObservationsZeroParentOne = variableAndParentData.stream().filter(variableAndParent -> variableAndParent[1] == 1 && variableAndParent[0] == 0).count();

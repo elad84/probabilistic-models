@@ -16,14 +16,14 @@ public class MaximumProbabilityInferenceCalculator {
 
     private ObservationsData observationsData;
     private TransmissionTree transmissionTree;
-    private static double THRESHOLD = 0.001;
+    private static double THRESHOLD = 0.0001;
 
     public MaximumProbabilityInferenceCalculator(TransmissionTree transmissionTree, ObservationsData observationsData) {
         this.observationsData = observationsData;
         this.transmissionTree = transmissionTree;
     }
 
-    public void compute(Node root) throws IllegalAccessException {
+    public String compute(Node root) throws IllegalAccessException {
         Double beforeLogliklihood = 0.0, dataProbability = 0.0;
         TransmissionTree transmissionTreeRound = this.transmissionTree;
 
@@ -46,6 +46,8 @@ public class MaximumProbabilityInferenceCalculator {
         System.out.print("\tlog-prob");
         System.out.println("\t\tlog-ld");
 
+        String results;
+
        do {
            beforeLogliklihood = dataProbability;
            //Step 2: for every 𝑖, use observed RVs (𝑋𝐴(𝑖)) and current model parameters
@@ -59,11 +61,8 @@ public class MaximumProbabilityInferenceCalculator {
 
            dataProbability = LikelihoodCalculator.calculateLogLikelihood(transmissionTreeRound,transmissionTreeRound.getNode(root.getKey()), observationsDataComplete);
            // print results
-           for (Edge edge : edgesOrdered) {
-               System.out.printf("%.3f\t", transmissionTreeRound.getEdgeWeight(edge));
-           }
-           System.out.printf("\t%.4f", dataProbability);
-           System.out.printf("\t\t%.4f\n", observationsDataComplete.getLikelihood());
+           results = printResults(dataProbability, transmissionTreeRound, edgesOrdered, observationsDataComplete);
+           System.out.print(results);
 
            //Step 3: Use 𝑋𝐴(𝑖),𝑋𝐵(𝑖)
            //to compute sufficient statistics 𝑛𝑘|𝑙𝑣 and normalize to
@@ -74,6 +73,18 @@ public class MaximumProbabilityInferenceCalculator {
 
        }while (Math.abs(beforeLogliklihood - dataProbability) > THRESHOLD );
 
+        return results;
+    }
+
+    private String printResults(Double dataProbability, TransmissionTree transmissionTreeRound, ArrayList<Edge> edgesOrdered, ObservationsData observationsDataComplete) {
+        StringBuffer sb = new StringBuffer();
+
+        for (Edge edge : edgesOrdered) {
+           sb.append(String.format("%.3f\t", transmissionTreeRound.getEdgeWeight(edge)));
+        }
+        sb.append(String.format("\t%.4f", dataProbability));
+        sb.append(String.format("\t\t%.4f\n", observationsDataComplete.getLikelihood()));
+        return sb.toString();
     }
 
     private void step3(Node root, TransmissionTree transmissionTreeRound, ObservationsData observationsDataComplete) {
@@ -97,38 +108,38 @@ public class MaximumProbabilityInferenceCalculator {
         ObservationsData observationsDataComplete = new ObservationsData();
         observationsDataComplete.setData(new ArrayList<>());
 
-        List<List<Integer>> data = observationsDataRound.getData();
+        List<List<Double>> data = observationsDataRound.getData();
         int nData = data.size();
         for (int i=0;i<nData;++i) {
-            List<Integer> data_i = data.get(i);
+            List<Double> data_i = data.get(i);
             TransmissionTree transmissionTree_i = TransmissionTreeFactory.cloneTree(transmissionTreeRound);
             Node root_i = transmissionTree_i.getNode(root.getKey());
             root_i.setRoot(true);
 
             //X3 X4 X6 X7 X9 X10
             Node node = transmissionTree_i.getNode(3);
-            node.setValue(data_i.get(0));
+            node.setValue(data_i.get(0).intValue());
             node = transmissionTree_i.getNode(4);
-            node.setValue(data_i.get(1));
+            node.setValue(data_i.get(1).intValue());
             node = transmissionTree_i.getNode(6);
-            node.setValue(data_i.get(2));
+            node.setValue(data_i.get(2).intValue());
             node = transmissionTree_i.getNode(7);
-            node.setValue(data_i.get(3));
+            node.setValue(data_i.get(3).intValue());
             node = transmissionTree_i.getNode(9);
-            node.setValue(data_i.get(4));
+            node.setValue(data_i.get(4).intValue());
             node = transmissionTree_i.getNode(10);
-            node.setValue(data_i.get(5));
+            node.setValue(data_i.get(5).intValue());
 
             MarginalDisributionCalculator marginalDisributionCalculator = new MarginalDisributionCalculator(transmissionTree_i);
             marginalDisributionCalculator.computeMarginals(root_i);
 
             Map<Integer, MarginalDisribution> nodesMarginalDisribution = transmissionTree_i.getNodesMarginalDisribution();
 
-            List<Integer> res_data_i = new ArrayList<>();
+            List<Double> res_data_i = new ArrayList<>();
             for (Integer key : nodesMarginalDisribution.keySet()) {
                 double prob0 = nodesMarginalDisribution.get(key).getValue(false);
                 double prob1 = nodesMarginalDisribution.get(key).getValue(true);
-                int obs =  prob1 >= prob0 ? 1 : 0;
+                double obs =  prob1 >= prob0 ? 1 : 0;
                 res_data_i.add(obs);
             }
 

@@ -13,11 +13,16 @@ import java.util.Map;
 public class TransmissionTree {
 	
 	private Map<Integer, Node> treeNodes;
+
 	private Map<Edge, Double> edges;
 	
 	public TransmissionTree(){
 		this.treeNodes = new HashMap<Integer, Node>();
 		this.edges = new HashMap<Edge, Double>();
+	}
+
+	public Map<Edge, Double> getEdges() {
+		return edges;
 	}
 
 	public Double getEdgeWeight(Node first, Node second){
