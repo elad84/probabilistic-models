@@ -108,9 +108,8 @@ public class EMCalculator {
             double likelihood = rootProb.getValue(false) + rootProb.getValue(true);
             dataLikelihood += Math.log(likelihood);
 
-            BinaryMessage argMaxBinaryMessage = new MaxMarginalDisributionCalculator(transmissionTree_i).collect(root_i, null).getBinaryMessage();
-            logProb += Math.log(0.5 * Math.max(argMaxBinaryMessage.getValue(false),argMaxBinaryMessage.getValue(true)));
-
+            Double nMax = new MaxMarginalDisributionCalculator(transmissionTree_i).computeMarginals(root_i);
+            logProb += Math.log(nMax);
 
             Map<Integer, MarginalDisribution> marginalDisributionsMap = transmissionTree_i.getNodesMarginalDisribution();
             Map<Edge, BinaryMessage> messages = marginalDisributionCalculator.getMessages();

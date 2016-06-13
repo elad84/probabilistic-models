@@ -13,10 +13,10 @@ public class EMTest {
 
     @Test
     public void calculate0() throws IllegalAccessException {
-        computeMLE("input/sample-data-2.txt");
+        compute("input/sample-data-2.txt");
     }
 
-    private void computeMLE(String inputFile) throws IllegalAccessException {
+    private void compute(String inputFile) throws IllegalAccessException {
         TransmissionTree tree = TransmissionTreeFactory.buildTree(new Double[]{0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2});
         Node node = tree.getNode(1);
         node.setRoot(true);
