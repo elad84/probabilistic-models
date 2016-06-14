@@ -1,7 +1,5 @@
 package com.idc.model;
 
-import javafx.util.Pair;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,14 +13,14 @@ public class ObservationsData {
     private List<List<Double>> data;
     private Map<Integer, List<Double>> variable2Data;
 
-    private double likelihood;
+    private double logprob;
 
-    public double getLikelihood() {
-        return likelihood;
+    public double getLogprob() {
+        return logprob;
     }
 
-    public void setLikelihood(double likelihood) {
-        this.likelihood = likelihood;
+    public void setLogprob(double logprob) {
+        this.logprob = logprob;
     }
 
     public List<String> getVariables() {

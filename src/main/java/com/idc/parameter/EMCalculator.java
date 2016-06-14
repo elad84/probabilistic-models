@@ -9,24 +9,22 @@ import java.util.*;
 
 /**
  * Created by annishaa on 6/2/16.
- *     //X3	X4	X6	X7	X9	X10
  */
 public class EMCalculator {
 
     private ObservationsData observationsData;
     private TransmissionTree transmissionTree;
-    private static double THRESHOLD = 0.001;
-
-
+    private static double THRESHOLD = 0.01;
 
     public EMCalculator(TransmissionTree transmissionTree, ObservationsData observationsData) {
         this.observationsData = observationsData;
         this.transmissionTree = transmissionTree;
     }
 
-    public void compute(Node root) throws IllegalAccessException {
+    public String compute(Node root) throws IllegalAccessException {
         Double beforeLogliklihood = 0.0, dataProbability = 0.0;
         TransmissionTree transmissionTreeRound = this.transmissionTree;
+        String results;
 
         List<Edge> edgesOrdered = getOrderedEdges();
 
@@ -48,15 +46,24 @@ public class EMCalculator {
 
             dataProbability = emModel.getLogProb();// LikelihoodCalculator.calculateLogLikelihood(transmissionTreeRound,  emModel);
             // print results
-            for (Edge edge : edgesOrdered) {
-                System.out.printf("%.3f\t", transmissionTreeRound.getEdgeWeight(edge));
-            }
-            System.out.printf("\t%.4f", dataProbability);
-            System.out.printf("\t\t%.4f\n", emModel.getLikelihood());
+            results = printResults(dataProbability, transmissionTreeRound, edgesOrdered, emModel);
+            //System.out.print(results);
 
             transmissionTreeRound = TransmissionTreeFactory.buildTreeNullWeight();
             MStep(transmissionTreeRound, emModel);
         }while (Math.abs(beforeLogliklihood - dataProbability) > THRESHOLD );
+        return results;
+    }
+
+    private String printResults(Double dataProbability, TransmissionTree transmissionTreeRound, List<Edge> edgesOrdered, EMModel emModel) {
+        StringBuffer sb = new StringBuffer();
+
+        for (Edge edge : edgesOrdered) {
+            sb.append(String.format("%.3f\t", transmissionTreeRound.getEdgeWeight(edge)));
+        }
+        sb.append(String.format("\t%.4f", dataProbability));
+        sb.append(String.format("\t\t%.4f\n", emModel.getLikelihood()));
+        return sb.toString();
     }
 
     private ArrayList<Edge> getOrderedEdges() {

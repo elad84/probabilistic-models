@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * Created by annishaa on 6/2/16.
- *     //X3	X4	X6	X7	X9	X10
  */
 public class MaximumProbabilityInferenceCalculator {
 
@@ -52,7 +51,7 @@ public class MaximumProbabilityInferenceCalculator {
            beforeLogliklihood = dataProbability;
            //Step 2: for every 𝑖, use observed RVs (𝑋𝐴(𝑖)) and current model parameters
            //(𝜃(𝑟)) to infer most probable assignment to hidden RVs (𝑋𝐵(𝑖))
-           //[ use max-probability message passing algorithm ]
+           //[ use message passing algorithm ]
 
            ObservationsData observationsDataComplete = step2(transmissionTreeRound, this.observationsData, root);
            Node treeRoot = transmissionTreeRound.getNode(root.getKey());
@@ -82,8 +81,8 @@ public class MaximumProbabilityInferenceCalculator {
         for (Edge edge : edgesOrdered) {
            sb.append(String.format("%.3f\t", transmissionTreeRound.getEdgeWeight(edge)));
         }
-        sb.append(String.format("\t%.4f", dataProbability));
-        sb.append(String.format("\t\t%.4f\n", observationsDataComplete.getLikelihood()));
+        sb.append(String.format("\t%.4f", dataProbability)); //log-prob
+        sb.append(String.format("\t\t%.4f\n", observationsDataComplete.getLogprob()));
         return sb.toString();
     }
 
@@ -93,7 +92,6 @@ public class MaximumProbabilityInferenceCalculator {
 
         ParameterInferenceCalculator parameterInferenceCalculator = new ParameterInferenceCalculator(observationsDataComplete);
         SufficientStatistics sufficientStatisticsRound = parameterInferenceCalculator.compute(rootRound);
-        //System.out.println(sufficientStatisticsRound);
 
         Map<SufficientStatistics.KeyPair, Double> nodeKey2FlipProbability = sufficientStatisticsRound.getNodeKey2FlipProbability();
         nodeKey2FlipProbability.entrySet().forEach(e -> {
@@ -146,7 +144,7 @@ public class MaximumProbabilityInferenceCalculator {
             MarginalDisribution marginalDisribution = nodesMarginalDisribution.get(1);
             double prob0 = marginalDisribution.getValue(false);
             double prob1 = marginalDisribution.getValue(true);
-            observationsDataComplete.setLikelihood( observationsDataComplete.getLikelihood() + Math.log(prob0 + prob1));
+            observationsDataComplete.setLogprob( observationsDataComplete.getLogprob() + Math.log(prob0 + prob1));
 
             observationsDataComplete.getData().add(res_data_i);
         }

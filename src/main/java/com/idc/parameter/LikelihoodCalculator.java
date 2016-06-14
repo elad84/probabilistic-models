@@ -15,7 +15,6 @@ public class LikelihoodCalculator {
                                                 ObservationsData observationsData) {
         double logLikelihood = 0;
         for (List<Double> observation : observationsData.getData()) {
-
             //set observation values to tree
             for (int i=0;i<observation.size();++i) {
                 Node node = tree.getNode(i+1);
@@ -33,7 +32,6 @@ public class LikelihoodCalculator {
     }
 
     public static double calculateLogLikelihood(ObservationsData observationsData, Node root, SufficientStatistics sufficientStatistics){
-
         Double[] weights = new Double[] {sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(1, 2)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(2,3)),
                 sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(2,4)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(1,5)),
                 sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(5,6)), sufficientStatistics.getFlipProbability(new SufficientStatistics.KeyPair(5,7)),
@@ -45,23 +43,5 @@ public class LikelihoodCalculator {
         treeRoot.setRoot(true);
         treeRoot.setParent(null);
         return LikelihoodCalculator.calculateLogLikelihood(transmissionTree, treeRoot, observationsData);
-    }
-
-    public static Double calculateLogLikelihood(TransmissionTree transmissionTreeRound, EMModel emModel) {
-
-        double logLikelihood = 0;
-        for (int i = 0; i < 1000; i++) {
-
-            double likelihood = 1.0;
-            for (Edge edge : emModel.getEdge2Ptable().keySet()) {
-                double p = transmissionTreeRound.getEdgeWeight(edge);
-
-                Double[][] pTable = emModel.getEdge2Ptable().get(edge).get(i);
-                likelihood *= (pTable[0][0] + pTable[1][1]) >=  (pTable[0][1] +  pTable[1][0]) ? (1-p) : p;
-            }
-
-            logLikelihood+=Math.log(0.5 * likelihood);
-        }
-        return logLikelihood;
     }
 }
