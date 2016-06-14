@@ -413,40 +413,12 @@ public class Main {
 
 				countFlips += Math.round(firstValue) == Math.round(socondValue) ? 0
 						: 1;
-<<<<<<< HEAD
-=======
 			}
 
 			tree.setEdgeWeight(countFlips / observations.size(), edge);
 		}
 	}
 
-	/**
-	 * Inference from expected data
-	 * @param tree
-	 * @param observations
-	 */
-	public static void inferFromExpectedData(TransmissionTree tree,
-			List<HashMap<Node, Double>> observations) {
-		Set<Edge> edges = tree.getEdges().keySet();
-		// iterate over all edges and calculate probability
-		for (Edge edge : edges) {
-			double countFlips = 0;
-			// for every edge run on all observations and count data flips
-			for (HashMap<Node, Double> observation : observations) {
-				Double firstValue = observation.get(edge.getFirstNode());
-				Double socondValue = observation.get(edge.getSecondNode());
-
-				double flipProb = firstValue * (1 - socondValue)
-						+ (1 - firstValue) * socondValue;
-
-				countFlips += flipProb;
->>>>>>> branch 'master' of https://github.com/elad84/probabilistic-models.git
-			}
-
-			tree.setEdgeWeight(countFlips / observations.size(), edge);
-		}
-	}
 
 	/**
 	 * Calculates the log probability for given observations with tree
