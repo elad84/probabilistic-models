@@ -184,4 +184,8 @@ public class MaxMarginalDisributionCalculator {
 			}
 		}
 	}
+
+	public double getmMax() {
+		return mMax;
+	}
 }

@@ -144,13 +144,14 @@ public class MarginalDisributionCalculator {
 			if (node.getValue() > -1 && node.getValue() < 2) {
 				zero = (1 - node.getValue()) * psi.getValue(false);
 				one = node.getValue() * psi.getValue(true);
+				node.setPsi(new Psi(zero, one));
 			} else {
 				zero = psi.getValue(false);
 				one = psi.getValue(true);
 			}
 		}
 
-		node.setPsi(new Psi(zero, one));
+//		node.setPsi(new Psi(zero, one));
 		node.setMarginalDisribution(new MarginalDisribution(zero, one));
 
 		if (!node.isLeaf()) {
@@ -183,6 +184,10 @@ public class MarginalDisributionCalculator {
 				}
 			}
 		}
+	}
+
+	public Map<Edge, BinaryMessage> getMessages() {
+		return messages;
 	}
 
 }

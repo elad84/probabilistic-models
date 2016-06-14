@@ -161,7 +161,7 @@ public class TransmissionTree {
 		for (Node node : treeNodes.values()) {
 			Double value = observation.get(node);
 			if (value != null) {
-				node.setValue(value);
+				node.setValue((int) Math.round(value));
 			} else
 				node.setValue(-1);
 		}

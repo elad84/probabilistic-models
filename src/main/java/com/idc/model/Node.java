@@ -28,7 +28,7 @@ public class Node {
 	/**
 	 * binary value indicator
 	 */
-	private double value;
+	private int value;
 
 	private Psi psi;
 
@@ -101,8 +101,8 @@ public class Node {
 
 	@Override
 	public String toString() {
-		return "Node [root=" + isRoot() + ", key=" + key + ", value=" + value
-				+ ", marginalDisribution=" + marginalDisribution + "]";
+		return "Node [" + key + ", value=" + value + ", md="
+				+ marginalDisribution + "]";
 	}
 
 	public Psi getPsi() {
@@ -121,11 +121,11 @@ public class Node {
 		this.marginalDisribution = marginalDisribution;
 	}
 
-	public double getValue() {
+	public int getValue() {
 		return value;
 	}
 
-	public void setValue(double value) {
+	public void setValue(int value) {
 		this.value = value;
 	}
 

@@ -10,9 +10,11 @@ import java.util.Set;
 import com.idc.message.MaxMarginalDisributionCalculator;
 import com.idc.message.MarginalDisributionCalculator;
 import com.idc.message.TransmissionTreeFactory;
+import com.idc.model.BinaryMessage;
 import com.idc.model.Edge;
 import com.idc.model.MarginalDisribution;
 import com.idc.model.Node;
+import com.idc.model.Psi;
 import com.idc.model.TransmissionTree;
 
 public class Main {
@@ -35,7 +37,8 @@ public class Main {
 
 	public static void main(String[] args) throws IllegalAccessException {
 
-		// String[] probsStr = "0.1 0.2 .3 .4 .5 .6 .7 .8 .9".split(" |\t");
+		// String[] probsStr =
+		// "0.174	0.396	0.231	0.150	0.161	0.179	0.154	0.223	0.159".split(" |\t");
 		// args[2] = probsStr[0];
 		// args[3] = probsStr[1];
 		// args[4] = probsStr[2];
@@ -211,11 +214,12 @@ public class Main {
 		System.out.print("\tlog-prob");
 		System.out.println("\t\tlog-ld");
 
-		List<HashMap<Node, Double>> inferedObservations = ObservationsReader
-				.copyObservations(observations);
-
 		do {
 
+			Map<Edge, Double> expectedFlipProbs = new HashMap<Edge, Double>();
+			for (Edge edge : edgesOrdered) {
+				expectedFlipProbs.put(edge, 0.0);
+			}
 			double dataLikelihood = 0;
 			// iterate over all observations
 			for (int i = 0; i < observations.size(); i++) {
@@ -233,28 +237,31 @@ public class Main {
 
 				Map<Integer, MarginalDisribution> marginalDisributionsMap = tree
 						.getNodesMarginalDisribution();
+				Map<Edge, BinaryMessage> messages = marginalDisributionCalculator
+						.getMessages();
+				for (Edge edge : edgesOrdered) {
+					BinaryMessage message = messages.get(edge);
 
-				// inference hidden RVs
-				HashMap<Node, Double> inferedObservation = inferedObservations
-						.get(i);
-				for (Integer key : marginalDisributionsMap.keySet()) {
-					MarginalDisribution marginalDisribution = marginalDisributionsMap
-							.get(key);
-					// the expectation of an indicator is the probability it
-					// equals 1
-					double[] dist = marginalDisribution
+					double[] marginalDisribution = marginalDisributionsMap.get(
+							edge.getFirstNode().getKey())
 							.getNormalizedMarginalDisribution();
-					inferedObservation.put(tree.getNode(key), dist[1]);
-					// System.out.print(dist[1]+"\t");
-				}
-				// System.out.println();
+					Psi psi = edge.getSecondNode().getPsi();
+					Double edgeFlipProb = tree.getEdgeWeight(edge);
 
-				// check that the inferred observations agrees with the actual
-				// observations
-				// for (Entry<Node, Double> e : observation.entrySet()) {
-				// assert (e.getValue().equals(inferedObservation.get(e
-				// .getKey())));
-				// }
+					double p1 = marginalDisribution[1] * edgeFlipProb
+							* psi.getValue(false) / message.getValue(true);
+
+					double p2 = marginalDisribution[0] * edgeFlipProb
+							* psi.getValue(true) / message.getValue(false);
+
+					// System.out.println(firstNode.getKey() + ","
+					// + secondNode.getKey() + ":" + zeroOneP + " "
+					// + oneZeroP);
+
+					expectedFlipProbs.put(edge, expectedFlipProbs.get(edge)
+							+ p1 + p2);
+
+				}
 
 				dataLikelihood += Math.log(likelihood);
 			}
@@ -267,8 +274,9 @@ public class Main {
 				tree.setValues(observation);
 				MaxMarginalDisributionCalculator marginalDisributionCalculator = new MaxMarginalDisributionCalculator(
 						tree);
-				double probability = marginalDisributionCalculator
-						.computeMarginals(tree.getRoot());
+				marginalDisributionCalculator.collect(tree.getRoot(), null);
+				double probability = marginalDisributionCalculator.getmMax();
+				// .computeMarginals(tree.getRoot());
 
 				dataProbability += Math.log(probability);
 			}
@@ -286,9 +294,12 @@ public class Main {
 			// save likelihood
 			prevLikelihood = dataLikelihood;
 
-			// update the parameters with the inferred hidden RVs and observed
-			// RVs
-			inferFromExpectedData(tree, inferedObservations);
+			// update the parameters
+			for (Entry<Edge, Double> e : expectedFlipProbs.entrySet()) {
+				tree.setEdgeWeight(e.getValue() / observations.size(),
+						e.getKey());
+				// System.out.println(e.getKey() + ":" + e.getValue());
+			}
 
 		} while (true);
 	}
@@ -331,27 +342,6 @@ public class Main {
 
 				countFlips += Math.round(firstValue) == Math.round(socondValue) ? 0
 						: 1;
-			}
-
-			tree.setEdgeWeight(countFlips / observations.size(), edge);
-		}
-	}
-
-	public static void inferFromExpectedData(TransmissionTree tree,
-			List<HashMap<Node, Double>> observations) {
-		Set<Edge> edges = tree.getEdges().keySet();
-		// iterate over all edges and calculate probability
-		for (Edge edge : edges) {
-			double countFlips = 0;
-			// for every edge run on all observations and count data flips
-			for (HashMap<Node, Double> observation : observations) {
-				Double firstValue = observation.get(edge.getFirstNode());
-				Double socondValue = observation.get(edge.getSecondNode());
-
-				double flipProb = firstValue * (1 - socondValue)
-						+ (1 - firstValue) * socondValue;
-
-				countFlips += flipProb;
 			}
 
 			tree.setEdgeWeight(countFlips / observations.size(), edge);
