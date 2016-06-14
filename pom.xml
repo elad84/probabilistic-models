@@ -40,7 +40,7 @@
 			</resource>
 		</resources>
 	
-		<finalName>message-passing</finalName>
+		<finalName>parameter-inference</finalName>
 		<plugins>
  
 			<!-- download source code in Eclipse, best practice -->
@@ -81,6 +81,11 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>com.idc.parameter.Main</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 
 			</plugin>

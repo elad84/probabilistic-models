@@ -47,7 +47,7 @@ public class EMCalculator {
             dataProbability = emModel.getLogProb();// LikelihoodCalculator.calculateLogLikelihood(transmissionTreeRound,  emModel);
             // print results
             results = printResults(dataProbability, transmissionTreeRound, edgesOrdered, emModel);
-            //System.out.print(results);
+            System.out.print(results);
 
             transmissionTreeRound = TransmissionTreeFactory.buildTreeNullWeight();
             MStep(transmissionTreeRound, emModel);
