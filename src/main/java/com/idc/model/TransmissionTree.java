@@ -1,6 +1,8 @@
 package com.idc.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -173,6 +175,14 @@ public class TransmissionTree {
 
 	public Node getRoot() {
 		return root;
+	}
+
+	public double[] getWeights(List<Edge> edges) {
+		double[] weights = new double[edges.size()];
+		for (int i = 0; i < edges.size(); i++) {
+			weights[i] = this.edges.get(edges.get(i));
+		}
+		return weights;
 	}
 
 	// public double logLikelihood() {

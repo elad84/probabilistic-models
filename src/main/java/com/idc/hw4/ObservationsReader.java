@@ -14,13 +14,9 @@ import com.idc.model.TransmissionTree;
 public class ObservationsReader {
 
 	static List<HashMap<Node, Double>> readObservations(TransmissionTree tree,
-			String dataFilePath) {
+			String dataFilePath) throws IOException {
 		List<String> lines = null;
-		try {
-			lines = Files.readAllLines(Paths.get(dataFilePath));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		lines = Files.readAllLines(Paths.get(dataFilePath));
 
 		String[] headersStr = lines.get(0).split("\t");
 

@@ -1,5 +1,6 @@
 package com.idc.hw4;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +26,8 @@ import com.idc.model.TransmissionTree;
  */
 public class Main {
 
-	private static ArrayList<Edge> edgesOrdered;
-	private static TransmissionTree tree;
+	public static ArrayList<Edge> edgesOrdered;
+	public static TransmissionTree tree;
 	static {
 		tree = TransmissionTreeFactory.buildHW3Tree();
 		edgesOrdered = new ArrayList<Edge>();
@@ -45,56 +46,61 @@ public class Main {
 	 * Inferring tree edges based on given method. Supports three methods:
 	 * <ul>
 	 * <li>
-	 * 		C - indicates inference is done on complete data. Expected arguments:
-	 * 		<ul>
-	 * 			<li>Path to a file with data for all RVs</li>
-	 * 		</ul>
+	 * C - indicates inference is done on complete data. Expected arguments:
+	 * <ul>
+	 * <li>Path to a file with data for all RVs</li>
+	 * </ul>
 	 * </li>
 	 * <li>
-	 * 		M - indicates inference is done based on partial data with Maximum probability method. Expected arguments:
-	 *  	<ul>
-	 * 			<li>Path to a file with partial data for some of the RVs</li>
-	 * 			<li>initial probability of flip for edge 1-2</li>
-	 * 			<li>initial probability of flip for edge 2-3</li>
-	 * 			<li>initial probability of flip for edge 1-5</li>
-	 * 			<li>initial probability of flip for edge 5-6</li>
-	 * 			<li>initial probability of flip for edge 5-7</li>
-	 * 			<li>initial probability of flip for edge 1-8</li>
-	 * 			<li>initial probability of flip for edge 8-9</li>
-	 * 			<li>initial probability of flip for edge 8-10</li>
-	 * 		</ul>
+	 * M - indicates inference is done based on partial data with Maximum
+	 * probability method. Expected arguments:
+	 * <ul>
+	 * <li>Path to a file with partial data for some of the RVs</li>
+	 * <li>initial probability of flip for edge 1-2</li>
+	 * <li>initial probability of flip for edge 2-3</li>
+	 * <li>initial probability of flip for edge 1-5</li>
+	 * <li>initial probability of flip for edge 5-6</li>
+	 * <li>initial probability of flip for edge 5-7</li>
+	 * <li>initial probability of flip for edge 1-8</li>
+	 * <li>initial probability of flip for edge 8-9</li>
+	 * <li>initial probability of flip for edge 8-10</li>
+	 * </ul>
 	 * </li>
 	 * <li>
-	 * 		E - indicates inference is done based on partial data with Expected Maximization method. Expected arguments:
-	 *  	<ul>
-	 * 			<li>Path to a file with partial data for some of the RVs</li>
-	 * 			<li>initial probability of flip for edge 1-2</li>
-	 * 			<li>initial probability of flip for edge 2-3</li>
-	 * 			<li>initial probability of flip for edge 1-5</li>
-	 * 			<li>initial probability of flip for edge 5-6</li>
-	 * 			<li>initial probability of flip for edge 5-7</li>
-	 * 			<li>initial probability of flip for edge 1-8</li>
-	 * 			<li>initial probability of flip for edge 8-9</li>
-	 * 			<li>initial probability of flip for edge 8-10</li>
-	 * 		</ul>
+	 * E - indicates inference is done based on partial data with Expected
+	 * Maximization method. Expected arguments:
+	 * <ul>
+	 * <li>Path to a file with partial data for some of the RVs</li>
+	 * <li>initial probability of flip for edge 1-2</li>
+	 * <li>initial probability of flip for edge 2-3</li>
+	 * <li>initial probability of flip for edge 1-5</li>
+	 * <li>initial probability of flip for edge 5-6</li>
+	 * <li>initial probability of flip for edge 5-7</li>
+	 * <li>initial probability of flip for edge 1-8</li>
+	 * <li>initial probability of flip for edge 8-9</li>
+	 * <li>initial probability of flip for edge 8-10</li>
+	 * </ul>
 	 * </li>
 	 * </ul>
+	 * 
 	 * @param args
 	 * @throws IllegalAccessException
 	 */
 	public static void main(String[] args) throws IllegalAccessException {
 
-		// String[] probsStr =
-		// "0.174	0.396	0.231	0.150	0.161	0.179	0.154	0.223	0.159".split(" |\t");
-		// args[2] = probsStr[0];
-		// args[3] = probsStr[1];
-		// args[4] = probsStr[2];
-		// args[5] = probsStr[3];
-		// args[6] = probsStr[4];
-		// args[7] = probsStr[5];
-		// args[8] = probsStr[6];
-		// args[9] = probsStr[7];
-		// args[10] = probsStr[8];
+		args[0] = "E";
+		args[1] = "tree-data-2c.txt";
+		
+		String[] probsStr = "0.0001	0.529	0.483	0.0001	0.0001	0.505	0.472	0.019	0.0001".split(" |\t");
+		args[2] = probsStr[0];
+		args[3] = probsStr[1];
+		args[4] = probsStr[2];
+		args[5] = probsStr[3];
+		args[6] = probsStr[4];
+		args[7] = probsStr[5];
+		args[8] = probsStr[6];
+		args[9] = probsStr[7];
+		args[10] = probsStr[8];
 
 		switch (args[0]) {
 		case "C":
@@ -111,8 +117,8 @@ public class Main {
 	}
 
 	/**
-	 * Inferring the edges values based on sample data with partial RVs assignment
-	 * and an initial edges values assignment
+	 * Inferring the edges values based on sample data with partial RVs
+	 * assignment and an initial edges values assignment
 	 * 
 	 * @param args
 	 * @throws IllegalAccessException
@@ -127,48 +133,64 @@ public class Main {
 		String dataFilePath = args[1];
 
 		// get initial edges probabilities
-		double p12 = Double.valueOf(args[2]);
-		double p23 = Double.valueOf(args[3]);
-		double p24 = Double.valueOf(args[4]);
-		double p15 = Double.valueOf(args[5]);
-		double p56 = Double.valueOf(args[6]);
-		double p57 = Double.valueOf(args[7]);
-		double p18 = Double.valueOf(args[8]);
-		double p89 = Double.valueOf(args[9]);
-		double p810 = Double.valueOf(args[10]);
+		double[] initialParams = new double[9];
+		initialParams[0] = Double.valueOf(args[2]);
+		initialParams[1] = Double.valueOf(args[3]);
+		initialParams[2] = Double.valueOf(args[4]);
+		initialParams[3] = Double.valueOf(args[5]);
+		initialParams[4] = Double.valueOf(args[6]);
+		initialParams[5] = Double.valueOf(args[7]);
+		initialParams[6] = Double.valueOf(args[8]);
+		initialParams[7] = Double.valueOf(args[9]);
+		initialParams[8] = Double.valueOf(args[10]);
 
-		tree.setEdgeWeight(p12, edgesOrdered.get(0));
-		tree.setEdgeWeight(p23, edgesOrdered.get(1));
-		tree.setEdgeWeight(p24, edgesOrdered.get(2));
-		tree.setEdgeWeight(p15, edgesOrdered.get(3));
-		tree.setEdgeWeight(p56, edgesOrdered.get(4));
-		tree.setEdgeWeight(p57, edgesOrdered.get(5));
-		tree.setEdgeWeight(p18, edgesOrdered.get(6));
-		tree.setEdgeWeight(p89, edgesOrdered.get(7));
-		tree.setEdgeWeight(p810, edgesOrdered.get(8));
+		String option = args[0];
+
+		inferenceFromPartialData(option, dataFilePath, initialParams);
+	}
+
+	public static double inferenceFromPartialData(String option,
+			String dataFilePath, double[] initialParams) {
+		tree.setEdgeWeight(initialParams[0], edgesOrdered.get(0));
+		tree.setEdgeWeight(initialParams[1], edgesOrdered.get(1));
+		tree.setEdgeWeight(initialParams[2], edgesOrdered.get(2));
+		tree.setEdgeWeight(initialParams[3], edgesOrdered.get(3));
+		tree.setEdgeWeight(initialParams[4], edgesOrdered.get(4));
+		tree.setEdgeWeight(initialParams[5], edgesOrdered.get(5));
+		tree.setEdgeWeight(initialParams[6], edgesOrdered.get(6));
+		tree.setEdgeWeight(initialParams[7], edgesOrdered.get(7));
+		tree.setEdgeWeight(initialParams[8], edgesOrdered.get(8));
 
 		// read all observations
-		List<HashMap<Node, Double>> observations = ObservationsReader
-				.readObservations(tree, dataFilePath);
+		List<HashMap<Node, Double>> observations;
+		try {
+			observations = ObservationsReader.readObservations(tree,
+					dataFilePath);
+		} catch (IOException e) {
+			System.out.println("Can't read file");
+			return 1;
+		}
 
-		switch (args[0]) {
+		switch (option) {
 		case "M":
-			maxProbabilityInferance(observations);
-			break;
+			return maxProbabilityInferance(observations);
 		case "E":
-			expectationMaximizationInferance(observations);
-			break;
+			return expectationMaximizationInferance(observations);
 		default:
 			break;
 		}
+		return 1;
 	}
 
 	/**
 	 * Inferring tree edges by the max probability method for partial data
 	 * 
-	 * @param observations list of partial observations
+	 * @param observations
+	 *            list of partial observations
+	 * @return
 	 */
-	public static void maxProbabilityInferance(List<HashMap<Node, Double>> observations) {
+	public static double maxProbabilityInferance(
+			List<HashMap<Node, Double>> observations) {
 
 		double prevProbability = Double.NEGATIVE_INFINITY;
 
@@ -183,21 +205,23 @@ public class Main {
 		List<HashMap<Node, Double>> inferedObservations = ObservationsReader
 				.copyObservations(observations);
 
-		//Iterate over data until find local maximum. In each iteration do:
-		//1. Inference the hidden RVs
-		//2. calculate log probability of the observed RVs
-		//3. calculate log likelihood of the complete data
-		//4. update edges values based on complete data
+		// Iterate over data until find local maximum. In each iteration do:
+		// 1. Inference the hidden RVs
+		// 2. calculate log probability of the observed RVs
+		// 3. calculate log likelihood of the complete data
+		// 4. update edges values based on complete data
+		double dataProbability = 0;
 		do {
-			double dataProbability = 0;
+			dataProbability = 0;
 			// iterate over all observations
 			for (int i = 0; i < observations.size(); i++) {
 				HashMap<Node, Double> observation = observations.get(i);
-				//infer the hidden values
+				// infer the hidden values
 				double probability = inferenceHiddenValues(observation,
-						inferedObservations, i);
+						inferedObservations.get(i));
 
-				//add current observation likelihood to log-prob
+				// add current observation likelihood to log-prob
+//				System.out.println(probability);
 				dataProbability += Math.log(probability);
 			}
 
@@ -211,7 +235,9 @@ public class Main {
 				double likelihood = marginalDisributionCalculator
 						.computeMarginals(tree.getRoot());
 
+//				System.out.println(Math.log(likelihood));
 				dataLikelihood += Math.log(likelihood);
+
 			}
 
 			// print iteration results
@@ -221,7 +247,11 @@ public class Main {
 			System.out.printf("\t%.4f", dataProbability);
 			System.out.printf("\t\t%.4f\n", dataLikelihood);
 
-			//if data probability did not improve more than epsilon found local maximum 
+			if (!Double.isFinite(dataProbability)) {
+				break;
+			}
+			// if data probability did not improve more than epsilon found local
+			// maximum
 			if (dataProbability - prevProbability < 0.001)
 				break;
 
@@ -233,6 +263,8 @@ public class Main {
 			inferFromCompleteData(tree, inferedObservations);
 
 		} while (true);
+
+		return dataProbability;
 	}
 
 	/**
@@ -245,7 +277,7 @@ public class Main {
 	 */
 	private static double inferenceHiddenValues(
 			HashMap<Node, Double> observation,
-			List<HashMap<Node, Double>> inferedObservations, int i) {
+			HashMap<Node, Double> inferedObservation) {
 
 		// initialize the tree with the current observation
 		tree.setValues(observation);
@@ -260,8 +292,6 @@ public class Main {
 				.getStarValues();
 
 		// inference hidden RVs
-		HashMap<Node, Double> inferedObservation = inferedObservations
-				.get(i);
 		for (Entry<Node, Boolean> marginalDist : marginalDisributionsMap
 				.entrySet()) {
 			if (marginalDist.getValue())
@@ -272,7 +302,7 @@ public class Main {
 		return probability;
 	}
 
-	public static void expectationMaximizationInferance(
+	public static double expectationMaximizationInferance(
 			List<HashMap<Node, Double>> observations) {
 
 		double prevLikelihood = Double.NEGATIVE_INFINITY;
@@ -285,13 +315,14 @@ public class Main {
 		System.out.print("\tlog-prob");
 		System.out.println("\t\tlog-ld");
 
+		double dataLikelihood;
 		do {
 
 			Map<Edge, Double> expectedFlipProbs = new HashMap<Edge, Double>();
 			for (Edge edge : edgesOrdered) {
 				expectedFlipProbs.put(edge, 0.0);
 			}
-			double dataLikelihood = 0;
+			dataLikelihood = 0;
 			// iterate over all observations
 			for (int i = 0; i < observations.size(); i++) {
 
@@ -373,6 +404,8 @@ public class Main {
 			}
 
 		} while (true);
+
+		return dataLikelihood;
 	}
 
 	/**
@@ -382,8 +415,14 @@ public class Main {
 	 */
 	public static void inferenceFromCompleteData(String dataFilePath) {
 		// read all observations
-		List<HashMap<Node, Double>> observations = ObservationsReader
-				.readObservations(tree, dataFilePath);
+		List<HashMap<Node, Double>> observations;
+		try {
+			observations = ObservationsReader.readObservations(tree,
+					dataFilePath);
+		} catch (IOException e) {
+			System.out.println("Can't read file");
+			return;
+		}
 
 		inferFromCompleteData(tree, observations);
 
@@ -418,7 +457,6 @@ public class Main {
 			tree.setEdgeWeight(countFlips / observations.size(), edge);
 		}
 	}
-
 
 	/**
 	 * Calculates the log probability for given observations with tree
